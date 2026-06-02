@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jrenoth Misquith — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ── Reset + Variables ─────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#020408;--bg2:#050d12;--bg3:#07121a;
+  --surf:#0a1922;--surf2:#0e2030;
+  --border:#102840;--border2:#1a3d5c;
+  --green:#00ff41;--green-d:#00c032;--green-m:#003d10;
+  --cyan:#00e5ff;--cyan-d:#00b8cc;
+  --gold:#ffd700;--gold-d:#ccac00;
+  --red:#ff4455;
+  --text:#b8d4c8;--text-d:#6a9080;--text-m:#2d5040;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Space Grotesk',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);line-height:1.6;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px)}
+::selection{background:var(--green);color:#000}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--green-m)}
+a{color:var(--green);text-decoration:none}
+a:hover{color:var(--cyan)}
+
+/* ── Layout ────────────────────────────────────────── */
+.container{max-width:1120px;margin:0 auto;padding:0 28px}
+.section{padding:96px 0}
+.alt{background:var(--bg2)}
+.sec-label{font-size:.68rem;letter-spacing:.18em;color:var(--text-m);text-transform:uppercase;margin-bottom:6px;font-family:var(--mono)}
+.sec-label::before{content:'// ';color:var(--green-m)}
+.sec-title{font-family:var(--sans);font-size:clamp(1.8rem,3vw,2.8rem);font-weight:800;color:#fff;margin-bottom:10px;line-height:1.1}
+.sec-title span{color:var(--green)}
+.sec-sub{color:var(--text-d);font-size:.85rem;margin-bottom:52px;max-width:540px}
+
+/* ── Reveal ────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}
+.reveal.visible{opacity:1;transform:none}
+
+/* ── Ticker ─────────────────────────────────────────── */
+#ticker-bar{background:var(--bg3);border-bottom:1px solid var(--border);overflow:hidden;height:32px;display:flex;align-items:center}
+.ticker-inner{display:flex;gap:0;animation:ticker 40s linear infinite;white-space:nowrap}
+.tick-item{display:inline-flex;align-items:center;gap:6px;padding:0 20px;border-right:1px solid var(--border);font-size:.68rem}
+.tick-sym{color:var(--text-m);letter-spacing:.06em}
+.tick-val.up{color:var(--green);font-weight:700}
+.tick-val.down{color:var(--cyan);font-weight:700}
+.tick-chg{color:var(--text-m)}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── Nav ─────────────────────────────────────────────── */
+nav{position:fixed;top:36px;left:50%;transform:translateX(-50%);z-index:100;transition:all .3s;width:auto}
+.nav-pill{
+  display:flex;align-items:center;gap:24px;
+  padding:10px 24px;
+  background:rgba(2,4,8,0.7);
+  border:1px solid var(--border2);
+  backdrop-filter:blur(16px);
+  border-radius:100px;
+}
+nav.scrolled .nav-pill{background:rgba(2,4,8,0.92);border-color:var(--border2);box-shadow:0 0 30px rgba(0,255,65,0.06)}
+.nav-logo{font-family:var(--sans);font-weight:800;font-size:.95rem;color:var(--green);letter-spacing:.02em;white-space:nowrap}
+.nav-logo span{color:var(--cyan)}
+.nav-links{display:flex;gap:4px}
+.nav-link{font-size:.75rem;color:var(--text-m);padding:4px 12px;border-radius:100px;transition:.2s;letter-spacing:.04em}
+.nav-link:hover,.nav-link.active{color:var(--green);background:rgba(0,255,65,0.08)}
+#clock{font-size:.7rem;color:var(--text-m);letter-spacing:.06em;font-family:var(--mono);white-space:nowrap}
+.burger{display:none;background:none;border:none;cursor:pointer;color:var(--green);font-size:1rem;font-family:var(--mono)}
+
+/* ── Hero ────────────────────────────────────────────── */
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;padding-top:80px}
+#matrix-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.18}
+.hero-inner{position:relative;z-index:1;padding:60px 28px}
+#boot-term{max-width:560px;margin:0 auto 32px;transition:opacity .4s,transform .4s}
+.boot-lines p{font-size:.8rem;color:var(--text-d);padding:1px 0}
+.boot-lines p:first-child{color:var(--cyan)}
+.boot-lines p:last-child{color:var(--green)}
+#hero-content{opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s;max-width:800px}
+.hero-status{display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--text-m);letter-spacing:.12em;margin-bottom:24px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+.hero-name{font-family:var(--sans);font-size:clamp(3rem,7vw,6rem);font-weight:800;color:var(--green);line-height:1;margin-bottom:16px;min-height:1.1em;text-shadow:0 0 40px rgba(0,255,65,.3)}
+.cursor-blink{animation:blink 1s step-end infinite;font-weight:300}
+.hero-role{font-size:clamp(.85rem,1.4vw,1rem);color:var(--cyan);margin-bottom:40px;letter-spacing:.04em;min-height:1.4em}
+.hero-stats{display:flex;gap:32px;flex-wrap:wrap;margin-bottom:44px;align-items:center}
+.hstat{display:flex;flex-direction:column;gap:2px}
+.hstat-v{font-family:var(--sans);font-size:2rem;font-weight:800;color:var(--green)}
+.hstat-v.gold{color:var(--gold)}
+.hstat-l{font-size:.65rem;color:var(--text-m);text-transform:uppercase;letter-spacing:.1em}
+.hsep{color:var(--border2);font-size:1.4rem}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn{padding:11px 24px;background:var(--green);color:#000;font-family:var(--mono);font-size:.82rem;font-weight:700;border:none;cursor:pointer;transition:.2s;letter-spacing:.04em;border-radius:0}
+.btn:hover{background:var(--cyan);box-shadow:0 0 20px rgba(0,229,255,.3);color:#000}
+.btn-ghost{padding:11px 24px;background:transparent;color:var(--green);font-family:var(--mono);font-size:.82rem;border:1px solid var(--border2);cursor:pointer;transition:.2s;letter-spacing:.04em}
+.btn-ghost:hover{border-color:var(--green);color:var(--cyan)}
+.hero-scroll{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);font-size:.68rem;color:var(--text-m);letter-spacing:.1em;animation:pulse 3s infinite}
+
+/* Waveform strip */
+.hero-wave{position:absolute;bottom:0;left:0;right:0;height:60px;display:flex;align-items:flex-end;gap:2px;padding:0 0 0 0;overflow:hidden;opacity:.3;pointer-events:none}
+.wv-bar{flex:1;background:linear-gradient(to top,var(--green),transparent);border-radius:2px 2px 0 0;animation:wave 1.4s ease-in-out infinite alternate}
+@keyframes wave{0%{transform:scaleY(.2)}100%{transform:scaleY(1)}}
+
+/* ── Terminal card ───────────────────────────────────── */
+.term{background:var(--surf);border:1px solid var(--border2);border-radius:6px;overflow:hidden}
+.term-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surf2);border-bottom:1px solid var(--border)}
+.tb-btn{width:10px;height:10px;border-radius:50%}
+.tb-btn.r{background:#ff5f57}.tb-btn.y{background:#ffbd2e}.tb-btn.g{background:#28ca41}
+.tb-title{flex:1;text-align:center;font-size:.68rem;color:var(--text-m);letter-spacing:.08em}
+.term-body{padding:20px}
+.prompt::before{content:'$ ';color:var(--green)}
+.kw{color:var(--cyan);font-weight:700}
+.arrow{color:var(--green)}
+.tag{display:inline-block;padding:2px 9px;border:1px solid var(--green-m);color:var(--text-d);font-size:.7rem;border-radius:2px;font-family:var(--mono)}
+.tag.cyan{border-color:rgba(0,229,255,.25);color:var(--cyan)}
+.tag.gold{border-color:rgba(255,215,0,.25);color:var(--gold)}
+.tag.red{border-color:rgba(255,68,85,.25);color:var(--red)}
+
+/* ── Experience ──────────────────────────────────────── */
+.exp-grid{display:flex;flex-direction:column;gap:0;position:relative}
+.exp-grid::before{content:'';position:absolute;left:16px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--border2) 10%,var(--border2) 90%,transparent)}
+.exp-item{display:grid;grid-template-columns:40px 1fr;gap:20px;margin-bottom:28px}
+.exp-dot{display:flex;flex-direction:column;align-items:center;gap:0;padding-top:14px}
+.exp-dot-inner{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0}
+.exp-content.term{transition:.25s}
+.exp-content.term:hover{border-color:var(--green-d);box-shadow:0 0 28px rgba(0,255,65,.06)}
+.exp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.exp-company{font-family:var(--sans);font-size:1.05rem;font-weight:700;color:var(--green)}
+.exp-role{color:var(--text-d);font-size:.85rem}
+.exp-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.exp-loc{font-size:.7rem;color:var(--text-m)}
+.exp-stack{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.exp-bullets{list-style:none;display:flex;flex-direction:column;gap:6px}
+.exp-bullets li{color:var(--text-d);font-size:.83rem}
+
+/* ── Open Source ─────────────────────────────────────── */
+.oss-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.oss-card{position:relative;overflow:hidden;transition:.25s}
+.oss-card:hover{border-color:var(--cyan-d);box-shadow:0 0 28px rgba(0,229,255,.06)}
+.oss-accent{position:absolute;top:0;left:0;width:3px;height:100%;background:var(--cyan)}
+.oss-body{padding:20px 20px 20px 24px}
+.oss-title{font-family:var(--sans);font-size:1rem;font-weight:700;color:#fff;margin-bottom:4px}
+.oss-type{font-size:.7rem;color:var(--cyan);margin-bottom:12px;letter-spacing:.06em}
+.oss-desc{font-size:.82rem;color:var(--text-d);line-height:1.65;margin-bottom:14px}
+.oss-stack{display:flex;flex-wrap:wrap;gap:6px}
+
+/* ── Projects ────────────────────────────────────────── */
+.proj-bento{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.proj-card{transition:.25s;cursor:default;position:relative;overflow:hidden}
+.proj-card::before{content:'';position:absolute;inset:0;opacity:0;transition:.3s;pointer-events:none}
+.proj-card:hover::before{opacity:1}
+.proj-card[data-color="green"]:hover{border-color:var(--green-d);box-shadow:0 0 32px rgba(0,255,65,.08)}
+.proj-card[data-color="cyan"]:hover{border-color:var(--cyan-d);box-shadow:0 0 32px rgba(0,229,255,.08)}
+.proj-card[data-color="gold"]:hover{border-color:var(--gold-d);box-shadow:0 0 32px rgba(255,215,0,.08)}
+.proj-card.wide{grid-column:span 2}
+.proj-card .term-bar{position:relative}
+.proj-type{font-size:.68rem;color:var(--text-m);margin-bottom:8px}
+.proj-title{font-family:var(--sans);font-size:1rem;font-weight:700;color:var(--green);margin-bottom:10px;line-height:1.2}
+.proj-card[data-color="cyan"] .proj-title{color:var(--cyan)}
+.proj-card[data-color="gold"] .proj-title{color:var(--gold)}
+.proj-desc{font-size:.8rem;color:var(--text-d);line-height:1.65;margin-bottom:14px}
+.proj-stack{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.proj-metrics{display:flex;flex-direction:column;gap:3px}
+.metric{font-size:.74rem}
+.m-green{color:var(--green)}.m-cyan{color:var(--cyan)}.m-gold{color:var(--gold)}
+
+/* ── Trading ─────────────────────────────────────────── */
+.trading-wrap{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.candle-wrap{position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--border2)}
+.candle-header{padding:12px 16px;background:var(--surf2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.candle-title{font-size:.75rem;color:var(--text-d);letter-spacing:.08em}
+.candle-badge{font-size:.7rem;color:var(--green);font-weight:700}
+#candle-canvas{display:block;width:100%;height:220px;background:var(--surf)}
+.stats-stack{display:flex;flex-direction:column;gap:10px}
+.stat-row.term{transition:.2s}
+.stat-row.term:hover{border-color:var(--green-d)}
+.stat-body{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.stat-left{display:flex;flex-direction:column;gap:2px}
+.stat-val{font-family:var(--sans);font-size:1.6rem;font-weight:800}
+.sv-green{color:var(--green);text-shadow:0 0 10px rgba(0,255,65,.4)}
+.sv-gold{color:var(--gold);text-shadow:0 0 10px rgba(255,215,0,.3)}
+.sv-cyan{color:var(--cyan);text-shadow:0 0 10px rgba(0,229,255,.3)}
+.stat-label{font-size:.75rem;color:var(--text-d);font-weight:600}
+.stat-sub{font-size:.66rem;color:var(--text-m)}
+
+/* Trading log below */
+.trading-log{margin-top:20px}
+
+/* ── Healthcare ──────────────────────────────────────── */
+.ecg-strip{background:var(--surf);border:1px solid var(--border2);border-radius:6px;padding:16px 20px;margin-bottom:20px;overflow:hidden}
+.ecg-label{font-size:.68rem;color:var(--green);letter-spacing:.1em;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.ecg-label::before{content:'♥';color:var(--red);animation:pulse 1s infinite}
+#ecg-svg{width:100%;height:60px;overflow:hidden}
+.health-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── Music ───────────────────────────────────────────── */
+.music-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.music-card{position:relative;overflow:hidden}
+.music-vis{height:80px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border-bottom:1px solid var(--border);overflow:hidden;position:relative}
+.music-vis canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.6}
+.music-eq{display:flex;align-items:flex-end;gap:3px;height:60px;justify-content:center}
+.eq-bar{width:6px;border-radius:3px 3px 0 0;animation:wave 0.8s ease-in-out infinite alternate}
+.music-body{padding:18px 20px}
+.music-title{font-family:var(--sans);font-size:.95rem;font-weight:700;color:#fff;margin-bottom:4px}
+.music-sub{font-size:.7rem;color:var(--cyan);margin-bottom:10px;letter-spacing:.06em}
+.music-desc{font-size:.8rem;color:var(--text-d);line-height:1.6;margin-bottom:12px}
+
+/* TidalCycles code block */
+.tidal-code{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:14px;font-size:.75rem;line-height:1.8;overflow-x:auto}
+.tc-comment{color:var(--text-m)}
+.tc-fn{color:var(--cyan)}
+.tc-str{color:var(--gold)}
+.tc-num{color:var(--green)}
+
+/* ── Achievements ────────────────────────────────────── */
+.ach-list{display:flex;flex-direction:column;gap:8px}
+.ach-row.term:hover{border-color:var(--green-d)}
+.ach-body{display:flex;align-items:flex-start;gap:16px;padding:16px 20px}
+.ach-idx{font-size:.82rem;font-weight:700;flex-shrink:0;font-family:var(--sans)}
+.ai-gold{color:var(--gold)}.ai-green{color:var(--green)}.ai-cyan{color:var(--cyan)}
+.ach-main{font-size:.88rem;color:var(--text);font-weight:500;font-family:var(--sans)}
+.ach-sub{font-size:.73rem;color:var(--text-m);display:block;margin-top:2px}
+
+/* ── Skills ──────────────────────────────────────────── */
+.skills-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sk-cat{font-size:.7rem;color:var(--cyan);margin-bottom:12px;letter-spacing:.08em;text-transform:uppercase}
+.sk-items{display:flex;flex-wrap:wrap;gap:6px}
+.sk-item{padding:3px 10px;background:var(--bg3);border:1px solid var(--border);color:var(--text-d);font-size:.75rem;border-radius:2px;transition:.2s}
+.sk-item:hover{border-color:var(--green);color:var(--green)}
+
+/* ── Contact ─────────────────────────────────────────── */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.contact-links{display:flex;flex-direction:column;gap:10px;margin:12px 0}
+.contact-link{display:flex;align-items:center;gap:10px;color:var(--text-d);transition:.2s;font-size:.85rem}
+.contact-link:hover{color:var(--cyan)}
+.cl-icon{color:var(--green);width:16px;text-align:center}
+.profile-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:24px;display:flex;flex-direction:column;gap:12px}
+.avatar{width:72px;height:72px;border:1px solid var(--border2);background:var(--surf);display:flex;align-items:center;justify-content:center;font-size:.6rem;color:var(--text-m);flex-shrink:0}
+.profile-name{font-family:var(--sans);font-size:1.1rem;font-weight:700;color:var(--green)}
+.profile-detail{font-size:.75rem;color:var(--text-m);line-height:1.8}
+
+/* ── Animations ──────────────────────────────────────── */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media(max-width:900px){
+  .proj-bento{grid-template-columns:1fr 1fr}
+  .proj-card.wide{grid-column:span 1}
+  .trading-wrap{grid-template-columns:1fr}
+  .oss-grid,.music-grid,.health-grid,.skills-grid,.contact-grid{grid-template-columns:1fr}
+  nav{top:0;width:100%;transform:none;left:0}
+  .nav-pill{border-radius:0;border-left:none;border-right:none;border-top:none;justify-content:space-between;padding:12px 20px}
+  .nav-links{display:none}
+  .burger{display:block}
+  #clock{display:none}
+}
+@media(max-width:600px){
+  .proj-bento{grid-template-columns:1fr}
+  .exp-item{grid-template-columns:1fr}
+  .exp-dot{display:none}
+  .exp-grid::before{display:none}
+  .hero-stats{gap:18px}
+  .hsep{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Ticker -->
+<div id="ticker-bar"><div class="ticker-inner" id="ticker"></div></div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-pill">
+    <div class="nav-logo">jm<span>@</span>dev</div>
+    <div class="nav-links">
+      <a class="nav-link" href="#experience">/experience</a>
+      <a class="nav-link" href="#projects">/projects</a>
+      <a class="nav-link" href="#trading">/trading</a>
+      <a class="nav-link" href="#music">/music</a>
+      <a class="nav-link" href="#about">/about</a>
+      <a class="nav-link" href="#contact">/contact</a>
+    </div>
+    <span id="clock">00:00:00</span>
+    <button class="burger" onclick="document.querySelector('.nav-links').style.display = document.querySelector('.nav-links').style.display==='flex'?'none':'flex'">[≡]</button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <canvas id="matrix-canvas"></canvas>
+  <div class="container hero-inner">
+    <div id="boot-term" class="term" style="max-width:560px;margin:0 auto 32px">
+      <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">boot — zsh</span></div>
+      <div class="term-body" style="padding:14px 20px"><div class="boot-lines"></div><span style="color:var(--green);animation:blink 1s infinite">█</span></div>
+    </div>
+    <div id="hero-content">
+      <div class="hero-status"><span class="dot"></span><span>SYSTEM ONLINE · BENGALURU, INDIA</span></div>
+      <h1 class="hero-name"><span id="typed-name"></span><span class="cursor-blink">█</span></h1>
+      <p class="hero-role"><span id="typed-role"></span></p>
+      <div class="hero-stats">
+        <div class="hstat"><span class="hstat-v">3+</span><span class="hstat-l">Companies</span></div>
+        <span class="hsep">|</span>
+        <div class="hstat"><span class="hstat-v">10+</span><span class="hstat-l">Projects</span></div>
+        <span class="hsep">|</span>
+        <div class="hstat"><span class="hstat-v gold">10×</span><span class="hstat-l">Returns</span></div>
+        <span class="hsep">|</span>
+        <div class="hstat"><span class="hstat-v" style="color:var(--cyan)">2.5yr</span><span class="hstat-l">Experience</span></div>
+      </div>
+      <div class="hero-cta">
+        <a href="#projects" class="btn">[  view_projects()  ]</a>
+        <a href="#contact" class="btn-ghost">[ get_in_touch() ]</a>
+      </div>
+    </div>
+  </div>
+  <div class="hero-wave"><div id="waveform-bars" style="display:flex;width:100%;gap:2px;align-items:flex-end;height:100%"></div></div>
+  <div class="hero-scroll">scroll_down() ↓</div>
+</section>
+
+<!-- Experience -->
+<section id="experience" class="section alt">
+  <div class="container">
+    <p class="sec-label">work_experience</p>
+    <h2 class="sec-title">Where I've <span>shipped</span></h2>
+    <p class="sec-sub">Backend, ML, cloud architecture across Hong Kong and Dubai.</p>
+    <div class="exp-grid">
+
+      <div class="exp-item reveal">
+        <div class="exp-dot"><div class="exp-dot-inner"></div></div>
+        <div class="exp-content term">
+          <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">banza.sh</span></div>
+          <div class="term-body">
+            <div class="exp-head">
+              <div><span class="exp-company">Banza</span> <span class="exp-role">// Backend Developer</span></div>
+              <div class="exp-meta"><span class="tag">Jun–Oct 2025</span><span class="exp-loc">📍 Dubai (Remote)</span></div>
+            </div>
+            <div class="exp-stack"><span class="tag">FastAPI</span><span class="tag">Python</span><span class="tag">PostgreSQL</span><span class="tag">Microservices</span><span class="tag">Postman</span></div>
+            <ul class="exp-bullets">
+              <li><span class="arrow">→</span> Engineered AI-driven recommendation backend aggregating 8+ platform data sources</li>
+              <li><span class="arrow">→</span> Architected event-driven microservices for 10,000+ simulated user profiles</li>
+              <li><span class="arrow">→</span> Built FastAPI routes + PostgreSQL analytics layer with minimal downtime</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="exp-item reveal">
+        <div class="exp-dot"><div class="exp-dot-inner"></div></div>
+        <div class="exp-content term">
+          <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">mycoach.sh</span></div>
+          <div class="term-body">
+            <div class="exp-head">
+              <div><span class="exp-company">Mycoach Health</span> <span class="exp-role">// Software Engineer & Data Science Intern</span></div>
+              <div class="exp-meta"><span class="tag">Jun–Sep 2023</span><span class="exp-loc">📍 HKSTP, Hong Kong</span></div>
+            </div>
+            <div class="exp-stack"><span class="tag">LLM Fine-tuning</span><span class="tag">Redis</span><span class="tag">MongoDB</span><span class="tag">Python</span><span class="tag">Healthcare AI</span></div>
+            <ul class="exp-bullets">
+              <li><span class="arrow">→</span> Fine-tuned LLMs with co-founder for healthcare applications</li>
+              <li><span class="arrow">→</span> Built Health GPT model — automated medical inference generation</li>
+              <li><span class="arrow">→</span> <span class="kw">+40% data retrieval efficiency · −25% doctor review time</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="exp-item reveal">
+        <div class="exp-dot"><div class="exp-dot-inner"></div></div>
+        <div class="exp-content term">
+          <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">pwc.sh</span></div>
+          <div class="term-body">
+            <div class="exp-head">
+              <div><span class="exp-company">PricewaterhouseCoopers</span> <span class="exp-role">// Software Engineering Trainee</span></div>
+              <div class="exp-meta"><span class="tag">Sep 2023–Mar 2024</span><span class="exp-loc">📍 Central, Hong Kong</span></div>
+            </div>
+            <div class="exp-stack"><span class="tag">Java</span><span class="tag">Azure</span><span class="tag">Salesforce API</span><span class="tag">Power BI</span><span class="tag">Spring</span></div>
+            <ul class="exp-bullets">
+              <li><span class="arrow">→</span> Led intern initiatives for website builders and Salesforce API integrations</li>
+              <li><span class="arrow">→</span> Designed Azure architectures; Power BI dashboards for client analytics</li>
+              <li><span class="arrow">→</span> <span class="kw">−30% development time for client website delivery</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Open Source -->
+<section id="opensource" class="section">
+  <div class="container">
+    <p class="sec-label">open_source</p>
+    <h2 class="sec-title">Open Source <span>Contributions</span></h2>
+    <p class="sec-sub">Production contributions to real-world Rust tooling and audio tech.</p>
+    <div class="oss-grid reveal">
+      <div class="term oss-card">
+        <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">contrapunk-audio/contrapunk</span></div>
+        <div style="position:relative">
+          <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:var(--cyan)"></div>
+          <div class="oss-body">
+            <div class="oss-title">Contrapunk</div>
+            <div class="oss-type">AUDIO TECH · RUST · TAURI · WASM</div>
+            <div class="oss-desc">Real-time counterpoint harmony desktop app — plug in a guitar and hear Bach/Jazz/Palestrina counterpoint generated live. Single-cycle pitch detection, 128-sample buffers, 8 harmony modes, 28 scale modes. Native via Tauri, browser via WebAssembly. Parallel fifths rejection, voice crossing prevention. Extended with <code style="color:var(--cyan);font-size:.78rem">contrapunk_osc_sender.rs</code> — OSC bridge broadcasting audio events to TouchDesigner for music-reactive visuals. Built a TD docs MCP server (556 ops indexed) to accelerate the visual integration.</div>
+            <div class="oss-stack"><span class="tag cyan">Rust</span><span class="tag cyan">Tauri</span><span class="tag cyan">WebAssembly</span><span class="tag cyan">OSC</span><span class="tag cyan">TouchDesigner</span><span class="tag cyan">Real-time Audio</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="term oss-card" style="border-color:var(--border2)">
+        <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">Rigor-Cloud/rigor → rigorcloud.com</span></div>
+        <div style="position:relative">
+          <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:var(--gold)"></div>
+          <div class="oss-body">
+            <div class="oss-title">Rigorcloud</div>
+            <div class="oss-type">LLM SAFETY · RUST · OPA/REGO · AI</div>
+            <div class="oss-desc">MITM proxy that fact-checks LLM responses mid-stream against Rego policy constraints — kills violating streams and auto-retries with correction feedback. Works with Claude Code, OpenCode. Regorus (pure-Rust OPA engine) for local policy eval. Zero telemetry, Apache 2.0.</div>
+            <div class="oss-stack"><span class="tag gold">Rust</span><span class="tag gold">OPA/Rego</span><span class="tag gold">LLM Safety</span><span class="tag gold">MITM Proxy</span><span class="tag gold">Claude API</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Projects -->
+<section id="projects" class="section alt">
+  <div class="container">
+    <p class="sec-label">projects</p>
+    <h2 class="sec-title">Things I've <span>built</span></h2>
+    <p class="sec-sub">AI systems, fullstack apps, quant tools, music tech.</p>
+    <div class="proj-bento">
+
+      <div class="term proj-card wide reveal" data-color="green">
+        <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">hospital-portal.py</span></div>
+        <div class="term-body">
+          <p class="proj-type">// Fullstack · PWA · AI</p>
+          <h3 class="proj-title">Hospital Patient Portal</h3>
+          <p class="proj-desc">High-performance PWA modernising patient care. Sub-2s loads, real-time "Health Bubble" messaging, fault-tolerant payment gateway, 3D UI, AI chatbot integration. Razorpay payment handling with full fault tolerance.</p>
+          <div class="proj-stack"><span class="tag">React 19</span><span class="tag">FastAPI</span><span class="tag">PostgreSQL</span><span class="tag">Razorpay</span><span class="tag">WebSocket</span></div>
+          <div class="proj-metrics"><span class="metric m-green">✓ −30% admin overhead</span><span class="metric m-green">✓ Sub-2s load time</span><span class="metric m-green">✓ 100% revenue secured</span></div>
+        </div>
+      </div>
+
+      <div class="term proj-card reveal" data-color="cyan">
+        <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">movie-rec.py</span></div>
+        <div class="term-body">
+          <p class="proj-type">// Agentic AI · MCP · Data Pipeline</p>
+          <h3 class="proj-title">AI Movie Recommender</h3>
+          <p class="proj-desc">8-platform agentic pipeline (Twitter, Spotify, YouTube, Netflix, Steam…) extracting user preferences. TMDB critic-style recs via Claude API + MCP-automated git workflow.</p>
+          <div class="proj-stack"><span class="tag">FastAPI</span><span class="tag">Pydantic AI</span><span class="tag">Claude API</span><span class="tag">MongoDB</span></div>
+          <div class="proj-metrics"><span class="metric m-cyan">✓ 8+ platforms</span><span class="metric m-cyan">✓ 10k+ profiles</span></div>
+        </div>
+      </div>
+
+      <div class="term proj-card reveal" data-color="gold">
+        <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">mugen.py</span></div>
+        <div class="term-body">
+          <p class="proj-type">// Startup · HKTECH300 · HKSTP Funded</p>
+          <h3 class="proj-title">MuGen — Music Generation</h3>
+          <p class="proj-desc">Gesture-based music editing via finger tracking. Google Magenta AI generation. Azure cloud offload. Dashboard A→Z for track import, AI enhancement and prolongation.</p>
+          <div class="proj-stack"><span class="tag">Azure</span><span class="tag">Magenta</span><span class="tag">Docker</span><span class="tag">Figma</span></div>
+          <div class="proj-metrics"><span class="metric m-gold">✓ HKTECH300 funded</span><span class="metric m-gold">✓ Best course project</span></div>
+        </div>
+      </div>
+
+      <div class="term proj-card wide reveal" data-color="gold">
+        <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">hedgefund.py</span></div>
+        <div class="term-body">
+          <p class="proj-type">// Architecture · Quant · Research</p>
+          <h3 class="proj-title">AI Hedge Fund Platform</h3>
+          <p class="proj-desc">Full system design: TimescaleDB tick data, Kafka event bus, NLP sentiment engine, options GEX analytics, on-chain crypto metrics, Claude API signal aggregation, walk-forward backtesting framework.</p>
+          <div class="proj-stack"><span class="tag">TimescaleDB</span><span class="tag">Kafka</span><span class="tag">Qdrant</span><span class="tag">Claude API</span><span class="tag">FastAPI</span></div>
+          <div class="proj-metrics"><span class="metric m-gold">✓ Multi-source signals</span><span class="metric m-gold">✓ Full architecture</span><span class="metric m-gold">✓ Kafka + TimescaleDB</span></div>
+        </div>
+      </div>
+
+      <div class="term proj-card reveal" data-color="green">
+        <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">tv-suite.pine</span></div>
+        <div class="term-body">
+          <p class="proj-type">// Quant · Pine Script · Backtesting</p>
+          <h3 class="proj-title">TradingView Strategy Suite</h3>
+          <p class="proj-desc">Custom Pine Script indicators — EMA34/SMA21 cloud with Ichimoku confluence scoring, Fibonacci rotation entries (0.214–0.25 zone → 0.75–0.786 target, ~70% success given candle close + relative strength confirmation), walk-forward backtested. Obsidian trading journal with knowledge graph.</p>
+          <div class="proj-stack"><span class="tag">Pine Script</span><span class="tag">Ichimoku</span><span class="tag">Fibonacci</span><span class="tag">EMA/SMA Cloud</span><span class="tag">Backtesting</span></div>
+          <div class="proj-metrics"><span class="metric m-green">✓ 2.5× profit factor</span><span class="metric m-green">✓ ~70% Fib rotation hit rate</span><span class="metric m-green">✓ Walk-forward validated</span></div>
+        </div>
+      </div>
+
+      <div class="term proj-card reveal" data-color="cyan">
+        <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">ai-tutor.py</span></div>
+        <div class="term-body">
+          <p class="proj-type">// EdTech · LLM · Adaptive</p>
+          <h3 class="proj-title">AI DSA & SQL Tutor</h3>
+          <p class="proj-desc">Intelligent tutoring for Python DSA and SQL. Adaptive question gen, step-by-step explanations, personalised difficulty scaling.</p>
+          <div class="proj-stack"><span class="tag">FastAPI</span><span class="tag">LLM</span><span class="tag">Adaptive AI</span></div>
+          <div class="proj-metrics"><span class="metric m-cyan">✓ Adaptive difficulty</span><span class="metric m-cyan">✓ SQL mastery</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Trading -->
+<section id="trading" class="section">
+  <div class="container">
+    <p class="sec-label">trading_and_finance</p>
+    <h2 class="sec-title">Quantitative <span>Edge</span></h2>
+    <p class="sec-sub">Where finance theory meets algorithmic execution.</p>
+    <div class="trading-wrap reveal">
+      <div>
+        <div class="candle-wrap">
+          <div class="candle-header"><span class="candle-title">LIVE SIMULATION · EQUITY CURVE</span><span class="candle-badge">● LIVE</span></div>
+          <canvas id="candle-canvas"></canvas>
+        </div>
+        <div class="trading-log term" style="margin-top:16px">
+          <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">strategy_log.txt</span></div>
+          <div class="term-body" style="font-size:.8rem;line-height:2">
+            <p class="prompt" style="margin-bottom:8px">cat strategy_overview.md</p>
+            <p><span class="kw">TRADINGVIEW SUITE</span> — Pine Script indicators: EMA34/SMA21 cloud, Ichimoku confluence (−5 to +5 regime score), Fibonacci rotation 0.214–0.25 → 0.75–0.786 (~70% hit rate w/ close + RS confirmation). 2.5× profit factor, walk-forward validated.</p>
+            <p><span class="kw">LIVE TRACK RECORD</span> — 10× returns Indian equities 2022–24. Hyrotrader: +13% in 1 month. Max 3% risk/trade.</p>
+            <p><span class="kw">AI HEDGE FUND</span> — TimescaleDB + Kafka + Claude API + Options GEX + On-chain crypto analytics.</p>
+            <p><span class="kw">BLOOMBERG</span> — Ranked #140 globally in equity trading competition 2024.</p>
+          </div>
+        </div>
+      </div>
+      <div class="stats-stack">
+        <div class="stat-row term"><div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span></div><div class="term-body stat-body"><div class="stat-left"><span class="stat-val sv-green">2.5×</span><span class="stat-label">Profit Factor</span><span class="stat-sub"># TradingView strategies</span></div></div></div>
+        <div class="stat-row term"><div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span></div><div class="term-body stat-body"><div class="stat-left"><span class="stat-val sv-green">45%</span><span class="stat-label">Hit Rate</span><span class="stat-sub"># Pivot-based systems</span></div></div></div>
+        <div class="stat-row term"><div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span></div><div class="term-body stat-body"><div class="stat-left"><span class="stat-val sv-gold">10×</span><span class="stat-label">Market Returns</span><span class="stat-sub"># Indian market 2022–24</span></div></div></div>
+        <div class="stat-row term"><div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span></div><div class="term-body stat-body"><div class="stat-left"><span class="stat-val sv-cyan">+13%</span><span class="stat-label">Hyrotrader</span><span class="stat-sub"># Crypto futures / 1 month</span></div></div></div>
+        <div class="stat-row term"><div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span></div><div class="term-body stat-body"><div class="stat-left"><span class="stat-val sv-gold">#140</span><span class="stat-label">Bloomberg Rank</span><span class="stat-sub"># Global equity competition</span></div></div></div>
+        <div class="stat-row term"><div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span></div><div class="term-body stat-body"><div class="stat-left"><span class="stat-val sv-green">3%</span><span class="stat-label">Max Risk / Trade</span><span class="stat-sub"># Strict risk management</span></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Healthcare -->
+<section id="healthcare" class="section alt">
+  <div class="container">
+    <p class="sec-label">healthcare_ai</p>
+    <h2 class="sec-title">Healthcare <span>Intelligence</span></h2>
+    <p class="sec-sub">Building AI that reduces doctor workload and improves patient outcomes.</p>
+    <div class="ecg-strip reveal">
+      <div class="ecg-label">ECG · PATIENT MONITORING SIGNAL</div>
+      <svg id="ecg-svg"></svg>
+    </div>
+    <div class="health-grid reveal">
+      <div class="term">
+        <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">health_gpt.py</span></div>
+        <div class="term-body">
+          <p class="proj-type">// Mycoach Health · HKSTP</p>
+          <h3 class="proj-title" style="color:var(--green);font-family:var(--sans);font-size:1rem;font-weight:700;margin-bottom:10px">Health GPT</h3>
+          <p style="font-size:.82rem;color:var(--text-d);line-height:1.65;margin-bottom:12px">Fine-tuned LLM for healthcare applications. Built with co-founder. Automated medical inference generation, cutting doctor review time by 25% and boosting data retrieval efficiency 40%.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag">LLM Fine-tuning</span><span class="tag">Redis</span><span class="tag">MongoDB</span><span class="tag">Healthcare AI</span></div>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">hospital-portal.py</span></div>
+        <div class="term-body">
+          <p class="proj-type">// React 19 · FastAPI · PWA</p>
+          <h3 class="proj-title" style="color:var(--green);font-family:var(--sans);font-size:1rem;font-weight:700;margin-bottom:10px">Hospital Patient Portal</h3>
+          <p style="font-size:.82rem;color:var(--text-d);line-height:1.65;margin-bottom:12px">Real-time "Health Bubble" messaging, AI chatbot integration, WebSocket-powered alerts, fault-tolerant Razorpay payment gateway, 3D UI components, sub-2s PWA load times.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag">React 19</span><span class="tag">WebSocket</span><span class="tag">Razorpay</span><span class="tag">AI Chatbot</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Music -->
+<section id="music" class="section">
+  <div class="container">
+    <p class="sec-label">music_tech</p>
+    <h2 class="sec-title">Music <span>Technology</span></h2>
+    <p class="sec-sub">From algorithmic composition experiments to AI music generation to real-time audio DSP.</p>
+    <div class="music-grid reveal">
+
+      <div class="term music-card">
+        <div class="music-vis" style="position:relative;overflow:hidden;height:120px;background:#000">
+          <canvas id="waveform-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+          <div style="position:absolute;bottom:10px;left:16px;font-size:.65rem;color:var(--text-m);letter-spacing:.1em;z-index:2">▶ TIDAL · EXPERIMENT</div>
+        </div>
+        <div class="music-body">
+          <div class="music-title">TidalCycles Experiments</div>
+          <div class="music-sub">ALGORITHMIC · SUPERCOLLIDER</div>
+          <div class="music-desc">Explored TidalCycles + SuperCollider for pattern-based algorithmic composition — playing with rhythmic cycles, harmonic layering, and generative sound design. Fred Again × Kanye West × ambient Hans Zimmer/RUFUS DU SOL references as source material for experimenting with live-coded soundscapes.</div>
+          <div class="tidal-code">
+<span class="tc-comment">-- exploring patterns: terrace ambience</span>
+d1 $ <span class="tc-fn">slow</span> <span class="tc-num">2</span> $ <span class="tc-fn">sound</span> <span class="tc-str">"bd sd hh"</span>
+  # <span class="tc-fn">gain</span> (<span class="tc-fn">range</span> <span class="tc-num">0.6</span> <span class="tc-num">1.0</span> $ <span class="tc-fn">slow</span> <span class="tc-num">8</span> <span class="tc-fn">sine</span>)
+d2 $ <span class="tc-fn">every</span> <span class="tc-num">4</span> (<span class="tc-fn">fast</span> <span class="tc-num">2</span>) $ <span class="tc-fn">sound</span> <span class="tc-str">"arpy*4"</span>
+  # <span class="tc-fn">note</span> (<span class="tc-fn">scale</span> <span class="tc-str">"minor"</span> <span class="tc-str">"0 2 4 7"</span>)</div>
+        </div>
+      </div>
+
+      <div class="term music-card">
+        <div class="music-vis" style="position:relative;overflow:hidden;height:120px;background:#000">
+          <canvas id="spectro-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+          <div style="position:absolute;bottom:10px;left:16px;font-size:.65rem;color:var(--text-m);letter-spacing:.1em;z-index:2">♪ MUGEN · AI GEN</div>
+        </div>
+        <div class="music-body">
+          <div class="music-title">MuGen — AI Music Generation</div>
+          <div class="music-sub">HKTECH300 · HKSTP SEED FUNDED</div>
+          <div class="music-desc">Gesture-based music editing using real-time finger tracking. Google Magenta AI for generation + prolongation. Cloud-offloaded to Azure. Full dashboard for track import, AI enhancement and export.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px"><span class="tag gold">Azure</span><span class="tag gold">Magenta AI</span><span class="tag gold">Finger Tracking</span><span class="tag gold">Docker</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Achievements -->
+<section id="about" class="section alt">
+  <div class="container">
+    <p class="sec-label">achievements</p>
+    <h2 class="sec-title">Track <span>Record</span></h2>
+    <div class="ach-list">
+      <div class="term ach-row reveal"><div class="ach-body"><span class="ach-idx ai-gold">[01]</span><div><span class="ach-main">100% Academic Merit Scholarship — 140,000 HKD/year</span><span class="ach-sub">// Dean's List Sem A 2023/24 · City University of Hong Kong</span></div></div></div>
+      <div class="term ach-row reveal"><div class="ach-body"><span class="ach-idx ai-green">[02]</span><div><span class="ach-main">Bloomberg Equity Trading — Ranked 140th Globally</span><span class="ach-sub">// 2024 competition</span></div></div></div>
+      <div class="term ach-row reveal"><div class="ach-body"><span class="ach-idx ai-cyan">[03]</span><div><span class="ach-main">HKTECH300 + HKSTP Seed Fund Recipient</span><span class="ach-sub">// MuGen Music ML Startup</span></div></div></div>
+      <div class="term ach-row reveal"><div class="ach-body"><span class="ach-idx ai-green">[04]</span><div><span class="ach-main">CityHack Finalist — 2nd Runner Up · Most Creative Team</span><span class="ach-sub">// Hackathon award</span></div></div></div>
+      <div class="term ach-row reveal"><div class="ach-body"><span class="ach-idx ai-cyan">[05]</span><div><span class="ach-main">Hyrotrader Challenge Passed — 13% profit in 1 month</span><span class="ach-sub">// Crypto futures prop firm challenge</span></div></div></div>
+      <div class="term ach-row reveal"><div class="ach-body"><span class="ach-idx ai-green">[06]</span><div><span class="ach-main">Microsoft Student Ambassador · Azure AI Builder Certified</span><span class="ach-sub">// Oct 2023–Feb 2024</span></div></div></div>
+      <div class="term ach-row reveal"><div class="ach-body"><span class="ach-idx ai-gold">[07]</span><div><span class="ach-main">IELTS Score 8.5 — English Proficiency</span><span class="ach-sub">// Languages: English · Kannada · Konkani · Hindi</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Skills -->
+<section class="section" style="position:relative;overflow:hidden">
+  <canvas id="circuit-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.22"></canvas>
+  <div class="container" style="position:relative;z-index:1">
+    <p class="sec-label">tech_stack</p>
+    <h2 class="sec-title">ls -la <span>skills/</span></h2>
+    <div class="skills-grid">
+      <div class="term reveal"><div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">backend/</span></div><div class="term-body"><div class="sk-cat">backend</div><div class="sk-items"><span class="sk-item">Python</span><span class="sk-item">FastAPI</span><span class="sk-item">Java</span><span class="sk-item">Spring</span><span class="sk-item">Node.js</span><span class="sk-item">REST</span><span class="sk-item">WebSockets</span></div></div></div>
+      <div class="term reveal"><div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">ai_ml/</span></div><div class="term-body"><div class="sk-cat">AI / ML</div><div class="sk-items"><span class="sk-item">PyTorch</span><span class="sk-item">Transformers</span><span class="sk-item">LLM Fine-tuning</span><span class="sk-item">Pydantic AI</span><span class="sk-item">Claude API</span><span class="sk-item">Magenta</span></div></div></div>
+      <div class="term reveal"><div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">databases/</span></div><div class="term-body"><div class="sk-cat">databases</div><div class="sk-items"><span class="sk-item">PostgreSQL</span><span class="sk-item">MongoDB</span><span class="sk-item">Redis</span><span class="sk-item">TimescaleDB</span><span class="sk-item">Qdrant</span><span class="sk-item">MySQL</span></div></div></div>
+      <div class="term reveal"><div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">cloud_ops/</span></div><div class="term-body"><div class="sk-cat">cloud / ops</div><div class="sk-items"><span class="sk-item">Azure</span><span class="sk-item">Docker</span><span class="sk-item">Kafka</span><span class="sk-item">Celery</span><span class="sk-item">GitHub Actions</span><span class="sk-item">Git</span></div></div></div>
+      <div class="term reveal"><div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">audio_systems/</span></div><div class="term-body"><div class="sk-cat">audio / music tech</div><div class="sk-items"><span class="sk-item">Rust</span><span class="sk-item">Tauri</span><span class="sk-item">WASM</span><span class="sk-item">TidalCycles</span><span class="sk-item">SuperCollider</span><span class="sk-item">Magenta</span></div></div></div>
+      <div class="term reveal"><div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">finance/</span></div><div class="term-body"><div class="sk-cat">quant / finance</div><div class="sk-items"><span class="sk-item">Bloomberg Terminal</span><span class="sk-item">Pine Script</span><span class="sk-item">Elliott Wave</span><span class="sk-item">Options GEX</span><span class="sk-item">Backtesting</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contact" class="section alt">
+  <div class="container">
+    <p class="sec-label">contact</p>
+    <h2 class="sec-title">Let's <span>build</span> something</h2>
+    <div class="contact-grid reveal">
+      <div class="term">
+        <div class="term-bar"><span class="tb-btn r"></span><span class="tb-btn y"></span><span class="tb-btn g"></span><span class="tb-title">contact.sh</span></div>
+        <div class="term-body">
+          <p class="prompt" style="margin-bottom:4px">whoami</p>
+          <p style="font-size:.84rem;color:var(--text-d);margin-bottom:16px">Open to backend, AI/ML, and quant engineering roles.<br>Happy to talk trading, music tech, or startup ideas.</p>
+          <p class="prompt" style="margin-bottom:8px">cat links.txt</p>
+          <div class="contact-links">
+            <a href="mailto:jrenothmisquith@gmail.com" class="contact-link"><span class="cl-icon">✉</span> jrenothmisquith@gmail.com</a>
+            <a href="https://linkedin.com/in/jrenoth-misquith-ba587b1b1/" target="_blank" class="contact-link"><span class="cl-icon">⊕</span> linkedin.com/in/jrenoth-misquith</a>
+            <a href="https://github.com/jrenoth" target="_blank" class="contact-link"><span class="cl-icon">⌥</span> github.com/jrenoth</a>
+            <a href="https://github.com/contrapunk-audio/contrapunk" target="_blank" class="contact-link"><span class="cl-icon">♪</span> github.com/contrapunk-audio/contrapunk</a>
+            <a href="https://rigorcloud.com" target="_blank" class="contact-link"><span class="cl-icon">⌬</span> rigorcloud.com</a>
+          </div>
+          <p class="prompt" style="margin-top:16px;margin-bottom:4px">echo $LOCATION</p>
+          <p style="font-size:.83rem;color:var(--text-d)">Bengaluru, India · +91 9148703028</p>
+        </div>
+      </div>
+      <div class="profile-wrap">
+        <div style="display:flex;gap:16px;align-items:center">
+          <div class="avatar">[ PHOTO ]</div>
+          <div>
+            <div class="profile-name">Jrenoth Misquith</div>
+            <div style="font-size:.72rem;color:var(--cyan);margin-top:2px">BSc Computer Science · Data Science</div>
+          </div>
+        </div>
+        <div class="profile-detail">
+          City University of Hong Kong<br>
+          Languages: English (IELTS 8.5) · Kannada · Konkani · Hindi<br><br>
+          <span style="color:var(--green)">Backend Engineer</span> · AI/ML systems · Quantitative trading · Music technology<br><br>
+          Contributed to: <span style="color:var(--cyan)">contrapunk-audio/contrapunk</span> · <span style="color:var(--gold)">Rigor-Cloud/rigor</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span class="tag">BSc CS</span><span class="tag cyan">Hong Kong</span><span class="tag gold">Bengaluru</span><span class="tag">Merit Scholar</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="portfolio-animations.js"></script>
+<script>
+// ── Waveform Canvas ────────────────────────────────────
+function initWaveformCanvas(canvasId, colorA, colorB) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let t = 0;
+  const bands = 64;
+  function draw() {
+    canvas.width = canvas.offsetWidth || 400;
+    canvas.height = canvas.offsetHeight || 120;
+    const W = canvas.width, H = canvas.height;
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+    const bw = W / bands;
+    for (let i = 0; i < bands; i++) {
+      const freq = i / bands;
+      const h = H * 0.08 + H * 0.72 * (
+        0.4 * Math.abs(Math.sin(t * 1.7 + freq * 8)) +
+        0.3 * Math.abs(Math.sin(t * 2.3 + freq * 5.5 + 1)) +
+        0.3 * Math.abs(Math.sin(t * 0.9 + freq * 12))
+      );
+      const grad = ctx.createLinearGradient(0, H, 0, H - h);
+      grad.addColorStop(0, colorA); grad.addColorStop(1, colorB);
+      ctx.fillStyle = grad; ctx.globalAlpha = 0.9;
+      ctx.fillRect(i * bw + 1, H - h, bw - 2, h);
+    }
+    ctx.globalAlpha = 1;
+    t += 0.022;
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ── Spectro Canvas ─────────────────────────────────────
+function initSpectroCanvas(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let t = 0;
+  function draw() {
+    canvas.width = canvas.offsetWidth || 400;
+    canvas.height = canvas.offsetHeight || 120;
+    const W = canvas.width, H = canvas.height;
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+    const cx = W / 2, cy = H / 2;
+    const R = Math.min(W, H) * 0.3;
+    const bars = 80;
+    for (let i = 0; i < bars; i++) {
+      const angle = (i / bars) * Math.PI * 2 - Math.PI / 2;
+      const amp = 0.35 * Math.abs(Math.sin(t * 1.8 + i * 0.25)) +
+                  0.35 * Math.abs(Math.sin(t * 2.6 + i * 0.18 + 1.2)) +
+                  0.3  * Math.abs(Math.sin(t * 1.1 + i * 0.4));
+      const len = R * 0.2 + R * 0.8 * amp;
+      const hue = (i / bars) * 60 + 30;
+      ctx.strokeStyle = `hsl(${hue},100%,60%)`;
+      ctx.lineWidth = 2; ctx.globalAlpha = 0.7 + 0.3 * amp;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(angle) * R, cy + Math.sin(angle) * R);
+      ctx.lineTo(cx + Math.cos(angle) * (R + len), cy + Math.sin(angle) * (R + len));
+      ctx.stroke();
+    }
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.6);
+    grad.addColorStop(0, 'rgba(255,215,0,0.18)'); grad.addColorStop(1, 'rgba(255,215,0,0)');
+    ctx.globalAlpha = 1; ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(cx, cy, R * 0.6, 0, Math.PI * 2); ctx.fill();
+    t += 0.018;
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ── Projection Mapping ─────────────────────────────────
+function initProjectionMapping(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let t = 0;
+  const nodes = Array.from({ length: 28 }, () => ({
+    x: Math.random(), y: Math.random(),
+    vx: (Math.random() - 0.5) * 0.0006,
+    vy: (Math.random() - 0.5) * 0.0006,
+  }));
+  function draw() {
+    const W = canvas.offsetWidth, H = canvas.offsetHeight;
+    if (!W || !H) { requestAnimationFrame(draw); return; }
+    canvas.width = W; canvas.height = H;
+    ctx.clearRect(0, 0, W, H);
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > 1) n.vx *= -1;
+      if (n.y < 0 || n.y > 1) n.vy *= -1;
+    });
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = (nodes[i].x - nodes[j].x) * W, dy = (nodes[i].y - nodes[j].y) * H;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 220) {
+          ctx.strokeStyle = `rgba(0,255,65,${(1-dist/220)*0.5})`;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.moveTo(nodes[i].x*W, nodes[i].y*H); ctx.lineTo(nodes[j].x*W, nodes[j].y*H); ctx.stroke();
+        }
+      }
+    }
+    for (let k = 0; k < 5; k++) {
+      const phase = t * 0.3 + k * 1.26;
+      const cx = W * (0.1 + k * 0.2), cy = H * (0.3 + 0.4 * Math.sin(phase * 0.7));
+      const w = 80 + 40 * Math.sin(phase), h = 50 + 30 * Math.cos(phase * 1.3);
+      ctx.save(); ctx.translate(cx, cy); ctx.transform(1, Math.sin(phase*0.5)*0.3, 0, 1, 0, 0);
+      ctx.strokeStyle = `rgba(0,229,255,${0.08+0.06*Math.sin(phase)})`; ctx.lineWidth = 1;
+      ctx.strokeRect(-w/2, -h/2, w, h);
+      ctx.strokeStyle = `rgba(0,255,65,${0.05+0.04*Math.cos(phase)})`;
+      ctx.beginPath(); ctx.moveTo(-w/2,0); ctx.lineTo(w/2,0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,-h/2); ctx.lineTo(0,h/2); ctx.stroke();
+      ctx.restore();
+    }
+    const scanY = ((t*60) % (H+80)) - 40;
+    const sg = ctx.createLinearGradient(0, scanY-20, 0, scanY+20);
+    sg.addColorStop(0,'rgba(0,255,65,0)'); sg.addColorStop(0.5,'rgba(0,255,65,0.07)'); sg.addColorStop(1,'rgba(0,255,65,0)');
+    ctx.fillStyle = sg; ctx.fillRect(0, scanY-20, W, 40);
+    nodes.forEach(n => { ctx.fillStyle='rgba(0,255,65,0.6)'; ctx.beginPath(); ctx.arc(n.x*W, n.y*H, 2, 0, Math.PI*2); ctx.fill(); });
+    t += 0.016;
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// Wire up new canvases after DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  initWaveformCanvas('waveform-canvas', '#00ff41', '#00e5ff');
+  initSpectroCanvas('spectro-canvas');
+  initProjectionMapping('proj-canvas');
+});
+</script>
+
+<!-- Tweaks Panel -->
+<script>
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#00ff41",
+  "showECG": true,
+  "darkMode": true,
+  "navStyle": "pill"
+}/*EDITMODE-END*/;
+
+let tweaksVisible = false;
+const panel = document.createElement('div');
+panel.id = 'tweaks-panel';
+panel.style.cssText = `
+  position:fixed;bottom:24px;right:24px;z-index:10000;
+  background:rgba(2,4,8,0.96);border:1px solid #1a3d5c;
+  border-radius:8px;padding:20px;width:240px;
+  font-family:'JetBrains Mono',monospace;font-size:.75rem;
+  color:#b8d4c8;display:none;backdrop-filter:blur(16px);
+  box-shadow:0 0 40px rgba(0,255,65,0.08);
+`;
+panel.innerHTML = `
+  <div style="font-weight:700;color:#00ff41;margin-bottom:16px;font-family:'Space Grotesk',sans-serif">Tweaks</div>
+  <label style="display:block;margin-bottom:12px">
+    <div style="color:#6a9080;margin-bottom:4px">Accent Color</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="tw-col" data-col="#00ff41" style="width:20px;height:20px;border-radius:50%;background:#00ff41;cursor:pointer;border:2px solid #fff"></span>
+      <span class="tw-col" data-col="#00e5ff" style="width:20px;height:20px;border-radius:50%;background:#00e5ff;cursor:pointer"></span>
+      <span class="tw-col" data-col="#ffd700" style="width:20px;height:20px;border-radius:50%;background:#ffd700;cursor:pointer"></span>
+      <span class="tw-col" data-col="#c084fc" style="width:20px;height:20px;border-radius:50%;background:#c084fc;cursor:pointer"></span>
+    </div>
+  </label>
+  <label style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <span style="color:#6a9080">Show ECG Strip</span>
+    <input type="checkbox" id="tw-ecg" ${TWEAK_DEFAULTS.showECG ? 'checked' : ''}>
+  </label>
+  <label style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+    <span style="color:#6a9080">Dark / Darker</span>
+    <input type="checkbox" id="tw-dark" ${TWEAK_DEFAULTS.darkMode ? 'checked' : ''}>
+  </label>
+`;
+document.body.appendChild(panel);
+
+document.querySelectorAll('.tw-col').forEach(el => {
+  el.addEventListener('click', () => {
+    const col = el.dataset.col;
+    document.documentElement.style.setProperty('--green', col);
+    document.querySelectorAll('.tw-col').forEach(e => e.style.border = 'none');
+    el.style.border = '2px solid #fff';
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { accentColor: col } }, '*');
+  });
+});
+
+document.getElementById('tw-ecg')?.addEventListener('change', e => {
+  const ecgStrip = document.querySelector('.ecg-strip');
+  if (ecgStrip) ecgStrip.style.display = e.target.checked ? '' : 'none';
+});
+
+document.getElementById('tw-dark')?.addEventListener('change', e => {
+  document.documentElement.style.setProperty('--bg', e.target.checked ? '#000000' : '#020408');
+});
+
+window.addEventListener('message', e => {
+  if (e.data?.type === '__activate_edit_mode') { panel.style.display = 'block'; tweaksVisible = true; }
+  if (e.data?.type === '__deactivate_edit_mode') { panel.style.display = 'none'; tweaksVisible = false; }
+});
+window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+</script>
+</body>
+</html>
