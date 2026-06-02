@@ -1,6 +1,7 @@
 <script>
   import { onMount }         from 'svelte';
   import { fly, fade }       from 'svelte/transition';
+  import { base }            from '$app/paths';
   import MatrixRain          from '$lib/components/MatrixRain.svelte';
   import CandlestickChart    from '$lib/components/CandlestickChart.svelte';
   import WaveformCanvas      from '$lib/components/WaveformCanvas.svelte';
@@ -135,12 +136,20 @@
       metrics: [{ t: 'HKTECH300 funded', c: 'm-gold' },{ t: 'Best course project', c: 'm-gold' }],
     },
     {
-      file: 'hedgefund.py', wide: true,
-      type: '// Architecture · Quant · Research', color: 'gold',
-      title: 'AI Hedge Fund Platform',
-      desc: 'Full system design: TimescaleDB tick data, Kafka event bus, NLP sentiment engine, options GEX analytics, on-chain crypto metrics, Claude API signal aggregation, walk-forward backtesting framework.',
-      stack: ['TimescaleDB','Kafka','Qdrant','Claude API','FastAPI'],
-      metrics: [{ t: 'Multi-source signals', c: 'm-gold' },{ t: 'Full architecture', c: 'm-gold' },{ t: 'Kafka + TimescaleDB', c: 'm-gold' }],
+      file: 'fieldstone/main.go', wide: true,
+      type: '// Backend · Go · BaaS · ONGOING', color: 'gold',
+      title: 'Fieldstone — PocketBase Alternative',
+      desc: 'Lightweight self-hosted BaaS built in Go. REST + gRPC + WebSocket APIs, multi-tenancy (row/schema/db isolation), JWT auth with key rotation, goroutine worker-pool job queues with exponential backoff, token-bucket/sliding-window rate limiting, SQLite + PostgreSQL backends, React admin dashboard, OpenAPI generation via reflection. Ongoing — actively developed.',
+      stack: ['Go 1.23','gRPC','Chi Router','WebSocket','PostgreSQL','SQLite','Docker'],
+      metrics: [{ t: 'Ongoing', c: 'm-gold' },{ t: 'Self-hosted BaaS', c: 'm-gold' },{ t: 'gRPC + WebSocket', c: 'm-gold' }],
+    },
+    {
+      file: 'quant-monitor.py', wide: false,
+      type: '// Quant · Semi-Automated · Research', color: 'gold',
+      title: 'Semi-Automated Quant Monitor',
+      desc: 'Personal semi-automated trading monitor — links AI global news monitors, TradingView alerts, Discord bot signal delivery, and Google Trends retail sentiment analysis to identify where crowd sentiment is clustering. Not fully automated; human-in-the-loop execution with systematic signal aggregation.',
+      stack: ['TradingView','Pine Script','Discord Bot','Google Trends','Python'],
+      metrics: [{ t: 'Semi-automated', c: 'm-gold' },{ t: 'Retail sentiment', c: 'm-gold' },{ t: 'Multi-source signals', c: 'm-gold' }],
     },
     {
       file: 'tv-suite.pine', wide: false,
@@ -500,9 +509,9 @@
       </div>
       <div class="term-body av-feature-body">
         <div class="av-feature-left">
-          <div class="av-role-badge">Visual Artist / AV Technician</div>
+          <div class="av-role-badge">Assistant Visual Artist / AV Shadow</div>
           <div class="av-venue">Sixth Sense — Bangalore</div>
-          <p class="av-desc">Assisted in generating AI-driven generative artwork in TouchDesigner for a live projection mapping performance. Operated LazyLighting for the lighting rig. Ran AV equipment end-to-end — signal routing, projection calibration, venue setup, live operation.</p>
+          <p class="av-desc">Shadowed and assisted a live projection mapping performance at Sixth Sense, Bangalore. Helped with generative artwork generation in TouchDesigner. Observed and assisted with LazyLighting rig operation, signal routing, projection calibration, and venue AV setup. First hands-on exposure to live AV production.</p>
           <div class="proj-stack" style="margin-top:12px">
             <span class="tag" style="border-color:rgba(0,255,65,0.3);color:var(--green)">TouchDesigner</span>
             <span class="tag" style="border-color:rgba(0,229,255,0.25);color:var(--cyan)">LazyLighting</span>
@@ -514,31 +523,31 @@
         <div class="av-feature-right">
           <div class="av-media-grid">
             <div class="av-media-item">
-              <video autoplay muted loop playsinline class="av-media-video" poster="/av/Sixth-sense-particle-art.jpg">
-                <source src="/av/fractal-art-sixth-sense.mp4" type="video/mp4"/>
+              <video autoplay muted loop playsinline class="av-media-video" poster="{base}/av/Sixth-sense-particle-art.jpg">
+                <source src="{base}/av/fractal-art-sixth-sense.mp4" type="video/mp4"/>
               </video>
             </div>
             <div class="av-media-item">
-              <img src="/av/Sixth-sense-particle-art.jpg" alt="Sixth Sense — particle art projection" class="av-media-img" loading="lazy"/>
+              <img src="{base}/av/Sixth-sense-particle-art.jpg" alt="Sixth Sense — particle art projection" class="av-media-img" loading="lazy"/>
             </div>
             <div class="av-media-item">
-              <video autoplay muted loop playsinline class="av-media-video" poster="/av/Sixth-sense-set-overlay.jpg">
-                <source src="/av/audio-reactive-histogram.mp4" type="video/mp4"/>
+              <video autoplay muted loop playsinline class="av-media-video" poster="{base}/av/Sixth-sense-set-overlay.jpg">
+                <source src="{base}/av/audio-reactive-histogram.mp4" type="video/mp4"/>
               </video>
             </div>
             <div class="av-media-item">
-              <img src="/av/outdoor-set-overlay.jpg" alt="Sixth Sense — outdoor set overlay" class="av-media-img" loading="lazy"/>
+              <img src="{base}/av/outdoor-set-overlay.jpg" alt="Sixth Sense — outdoor set overlay" class="av-media-img" loading="lazy"/>
             </div>
           </div>
           <div class="av-extras-strip">
             <div class="av-media-item">
-              <video autoplay muted loop playsinline class="av-media-video" poster="/av/Sixth-sense-set-overlay.jpg">
-                <source src="/av/Retro-dither.mp4" type="video/mp4"/>
+              <video autoplay muted loop playsinline class="av-media-video" poster="{base}/av/Sixth-sense-set-overlay.jpg">
+                <source src="{base}/av/Retro-dither.mp4" type="video/mp4"/>
               </video>
             </div>
             <div class="av-media-item">
-              <video autoplay muted loop playsinline class="av-media-video" poster="/av/Sixth-sense-set-overlay.jpg">
-                <source src="/av/Home-set.mp4" type="video/mp4"/>
+              <video autoplay muted loop playsinline class="av-media-video" poster="{base}/av/Sixth-sense-set-overlay.jpg">
+                <source src="{base}/av/Home-set.mp4" type="video/mp4"/>
               </video>
             </div>
           </div>
