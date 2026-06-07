@@ -96,9 +96,14 @@
       { src: '/projects/longevity/04-consultations-zoom.png', cap: 'Zoom consultations — start / join meeting' },
       { src: '/projects/longevity/05-login.png', cap: 'Auth — member / physician / admin roles' },
     ],
-    // real running-admin capture + the interactive concurrency explainer
+    // real running-admin captures (built + run on SQLite) + the concurrency explainer
     fieldstone: [
-      { src: '/projects/fieldstone/01-dashboard.png', cap: 'Fieldstone admin — running locally (SQLite), live dashboard' },
+      { src: '/projects/fieldstone/01-dashboard.png', cap: 'Admin dashboard — running locally on SQLite' },
+      { src: '/projects/fieldstone/02-collections.png', cap: 'Collections — 3 live collections in the DB' },
+      { src: '/projects/fieldstone/04-gateway-tables.png', cap: 'Tables (Gateway) — auto-REST over Postgres' },
+      { src: '/projects/fieldstone/05-graphql.png', cap: 'GraphQL playground' },
+      { src: '/projects/fieldstone/06-edge-functions.png', cap: 'Edge Functions — invoke panel' },
+      { src: '/projects/fieldstone/07-plugins.png', cap: 'WASM plugins — version / status / memory' },
       { src: '/projects/fieldstone-viz.png', cap: 'Interactive Go-concurrency explainer (motion.dev)' },
     ],
   };

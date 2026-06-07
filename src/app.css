@@ -57,7 +57,9 @@ a { color: var(--green); text-decoration: none; }
 a:hover { color: var(--cyan); }
 
 .container { max-width: 1120px; margin: 0 auto; padding: 0 28px; }
-.section    { padding: 96px 0; }
+.section    { padding: 96px 0; position: relative; overflow: hidden; }
+/* lift section content above any synthwave-grid backdrop placed as a section child */
+.section > .container { position: relative; z-index: 2; }
 .alt        { background: var(--bg2); }
 
 /* ── Terminal window ──────────────────────────────── */

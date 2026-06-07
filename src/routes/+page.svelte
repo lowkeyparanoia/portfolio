@@ -8,6 +8,7 @@
   import ArchModal           from '$lib/components/ArchModal.svelte';
   import ProjectVizModal     from '$lib/components/ProjectVizModal.svelte';
   import ArCard              from '$lib/components/ArCard.svelte';
+  import SynthwaveGrid       from '$lib/components/SynthwaveGrid.svelte';
   import MatrixRain          from '$lib/components/MatrixRain.svelte';
   import CandlestickChart    from '$lib/components/CandlestickChart.svelte';
   import WaveformCanvas      from '$lib/components/WaveformCanvas.svelte';
@@ -306,6 +307,7 @@
 <!-- FEATURED WORK (visual hook — above the text)                -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="featured" class="section">
+  <SynthwaveGrid intensity={0.5} />
   <div class="container">
     <p class="sec-label">featured_work</p>
     <h2 class="sec-title">Selected <span>builds</span> — explore the architecture</h2>
@@ -362,6 +364,7 @@
 <!-- OPEN SOURCE                                                 -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="opensource" class="section">
+  <SynthwaveGrid intensity={0.42} />
   <div class="container">
     <p class="sec-label">open_source</p>
     <h2 class="sec-title">Open Source <span>Contributions</span></h2>
@@ -434,6 +437,7 @@
 <!-- TRADING                                                     -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="trading" class="section">
+  <SynthwaveGrid intensity={0.4} />
   <div class="container">
     <p class="sec-label">trading_and_finance</p>
     <h2 class="sec-title">Quantitative <span>Edge</span></h2>
@@ -524,6 +528,7 @@
 <!-- MUSIC                                                       -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="music" class="section">
+  <SynthwaveGrid intensity={0.4} />
   <div class="container">
     <p class="sec-label">music_tech</p>
     <h2 class="sec-title">Music <span>Technology</span></h2>
@@ -656,6 +661,7 @@
 <!-- ACHIEVEMENTS                                               -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="about" class="section">
+  <SynthwaveGrid intensity={0.42} />
   <div class="container">
     <p class="sec-label">achievements</p>
     <h2 class="sec-title">Track <span>Record</span></h2>
@@ -706,6 +712,7 @@
 <!-- DIGITAL / AR CARD                                          -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="card" class="section">
+  <SynthwaveGrid intensity={1} />
   <div class="container">
     <p class="sec-label">digital_card</p>
     <h2 class="sec-title">My card, in <span>3D</span> &amp; <span>AR</span></h2>
@@ -720,6 +727,7 @@
 <!-- CONTACT                                                    -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="contact" class="section alt">
+  <SynthwaveGrid intensity={0.5} />
   <div class="container">
     <div class="contact-grid reveal">
       <div class="term contact-term">
