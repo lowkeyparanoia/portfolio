@@ -10,6 +10,7 @@
     {
       key: 'champiq', visual: 'img', img: '/projects/champiq.png',
       badge: { t: 'Freelance · ChampionsGroup', c: 'cyan' },
+      domain: 'Marketing · SDR',
       title: 'ChampIQ', tagline: 'AI-native SDR canvas',
       hook: 'Per-client knowledge graph + signal-grounded AI outreach on a durable DAG. 3–5× reply lift.',
       stack: ['Sim', 'Knowledge Graph', 'Claude', 'React'],
@@ -18,6 +19,7 @@
     {
       key: 'fieldstone', visual: 'img', img: '/projects/fieldstone/01-dashboard.png',
       badge: { t: 'In-house · Open source', c: 'gold' },
+      domain: 'Developer Infrastructure',
       title: 'Fieldstone', tagline: 'in-house PocketBase alternative',
       hook: 'A single Go binary: REST + GraphQL + gRPC over Postgres with real RLS, WASM plugins, a realtime hub.',
       stack: ['Go', 'Postgres', 'gRPC', 'WASM'],
@@ -27,6 +29,7 @@
     {
       key: 'longevity', visual: 'img', img: '/projects/longevity/01-home-today-dashboard.png',
       badge: { t: 'Team · Champ-Deep', c: 'green' },
+      domain: 'Healthcare · Longevity',
       title: '100xLongevity', tagline: 'clinical longevity platform',
       hook: 'Biological-age scoring, wearables, on-device CV, and physician-gated AI consults — DPDPA-compliant.',
       stack: ['React Native', 'Supabase', 'Zoom', 'Ollama'],
@@ -35,6 +38,7 @@
     {
       key: 'contrapunk', visual: 'wave',
       badge: { t: 'Open source · Rust', c: 'cyan' },
+      domain: 'Music Tech',
       title: 'Contrapunk', tagline: 'real-time counterpoint engine',
       hook: 'Plug in a guitar → rule-correct Bach / Jazz / Palestrina harmony in <10 ms. One Rust core, four surfaces.',
       stack: ['Rust', 'Tauri', 'WASM', 'VexFlow'],
@@ -58,7 +62,10 @@
       </div>
 
       <div class="fw-body">
-        <span class="fw-badge fw-{f.badge.c}">{f.badge.t}</span>
+        <div class="fw-meta">
+          <span class="fw-badge fw-{f.badge.c}">{f.badge.t}</span>
+          {#if f.domain}<span class="fw-domain">◇ {f.domain}</span>{/if}
+        </div>
         <h3 class="fw-title">{f.title} <span class="fw-tag">— {f.tagline}</span></h3>
         <p class="fw-hook">{f.hook}</p>
         <div class="fw-stack">{#each f.stack as s}<span class="tag">{s}</span>{/each}</div>
@@ -93,7 +100,9 @@
   }
 
   .fw-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
-  .fw-badge { align-self: flex-start; font-family: var(--font); font-size: 0.58rem; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 3px; border: 1px solid var(--border2); color: var(--text-dim); }
+  .fw-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .fw-badge { font-family: var(--font); font-size: 0.58rem; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 3px; border: 1px solid var(--border2); color: var(--text-dim); }
+  .fw-domain { font-family: var(--font); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-dim); }
   .fw-cyan  { color: var(--cyan);  border-color: var(--cyan-d); }
   .fw-gold  { color: var(--gold);  border-color: var(--gold-d); }
   .fw-green { color: var(--green); border-color: var(--green-dim); }
