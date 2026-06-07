@@ -543,6 +543,7 @@
             <a href="mailto:jrenothmisquith@gmail.com" class="contact-link"><span class="cl-icon">✉</span> jrenothmisquith@gmail.com</a>
             <a href="https://linkedin.com/in/jrenoth-misquith-ba587b1b1/" target="_blank" rel="noopener" class="contact-link"><span class="cl-icon">⊕</span> linkedin.com/in/jrenoth-misquith</a>
             <a href="https://github.com/jrenoth" target="_blank" rel="noopener" class="contact-link"><span class="cl-icon">⌥</span> github.com/jrenoth</a>
+            <a href="https://www.tradingview.com/u/jrenothmisquith/" target="_blank" rel="noopener" class="contact-link"><span class="cl-icon">▤</span> tradingview.com/u/jrenothmisquith</a>
             <a href="https://github.com/contrapunk-audio/contrapunk" target="_blank" rel="noopener" class="contact-link"><span class="cl-icon">♪</span> github.com/contrapunk-audio/contrapunk</a>
             <a href="https://rigorcloud.com" target="_blank" rel="noopener" class="contact-link"><span class="cl-icon">⌬</span> rigorcloud.com</a>
           </div>
