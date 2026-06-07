@@ -84,4 +84,10 @@
   .mf-replay:hover { border-color: var(--cyan); }
   .mf-replay:disabled { opacity: 0.5; cursor: default; }
   @media (max-width: 700px) { .mf-stag { display: none; } }
+  @media (max-width: 520px) {
+    .mf-track { gap: 4px; }
+    .mf-stage { padding: 9px 3px; }
+    .mf-lab { font-size: 0.56rem; }
+    .mf-status { font-size: 0.68rem; }
+  }
 </style>

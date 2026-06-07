@@ -207,4 +207,16 @@
   .note { font-size: 0.78rem; color: var(--text-dim); line-height: 1.6; margin-top: 14px; }
   .note a { color: var(--cyan); }
   .wave { height: 160px; border: 1px solid var(--border2); border-radius: var(--radius); overflow: hidden; background: #000; }
+
+  @media (max-width: 640px) {
+    .ov { padding: 10px; }
+    .shell { width: 100%; max-height: 94vh; }
+    .head { padding: 12px 14px 6px; }
+    .head h3 { font-size: 1rem; }
+    .head p { font-size: 0.74rem; }
+    .tabs { padding: 0 12px 10px; gap: 5px; }
+    .tb { font-size: 0.68rem; padding: 5px 10px; }
+    .content { padding: 14px 12px; }
+    .flow-blk h4 { font-size: 0.66rem; }
+  }
 </style>

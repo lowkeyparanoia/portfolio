@@ -1,14 +1,11 @@
 <script>
   import { onMount }         from 'svelte';
   import { fly, fade }       from 'svelte/transition';
-  import { flip }            from 'svelte/animate';
   import { base }            from '$app/paths';
-  import ProjectCard         from '$lib/components/ProjectCard.svelte';
   import FeaturedWork        from '$lib/components/FeaturedWork.svelte';
-  import ArchModal           from '$lib/components/ArchModal.svelte';
   import ProjectVizModal     from '$lib/components/ProjectVizModal.svelte';
   import ArCard              from '$lib/components/ArCard.svelte';
-  import SynthwaveGrid       from '$lib/components/SynthwaveGrid.svelte';
+  import SectionBg           from '$lib/components/SectionBg.svelte';
   import MatrixRain          from '$lib/components/MatrixRain.svelte';
   import CandlestickChart    from '$lib/components/CandlestickChart.svelte';
   import WaveformCanvas      from '$lib/components/WaveformCanvas.svelte';
@@ -61,6 +58,18 @@
   // ── Data ─────────────────────────────────────────────────────
   const experience = [
     {
+      file: 'contrapunk-audio/contrapunk',
+      company: 'Contrapunk', role: 'real-time counterpoint engine',
+      period: '2025 – present', loc: 'Rust · Tauri · WASM',
+      badge: 'OPEN SOURCE',
+      stack: ['Rust','Tauri','WebAssembly','OSC','TouchDesigner'],
+      bullets: [
+        'Plug in a guitar → live Bach / Jazz / Palestrina counterpoint, sub-10ms pluck→MIDI',
+        'Single-cycle pitch detection, 128-sample buffers, 8 harmony modes, 28 scales; native via Tauri, browser via WASM',
+        'OSC bridge broadcasting audio events to TouchDesigner for music-reactive live visuals',
+      ],
+    },
+    {
       file: 'banza.sh',
       company: 'Banza', role: 'Backend Developer',
       period: 'Jun–Oct 2025', loc: 'Dubai (Remote)',
@@ -95,115 +104,13 @@
     },
   ];
 
-  const oss = [
-    {
-      file: 'contrapunk-audio/contrapunk',
-      title: 'Contrapunk',
-      type: 'AUDIO TECH · RUST · TAURI · WASM',
-      desc: `Real-time counterpoint harmony desktop app — plug in a guitar and hear Bach/Jazz/Palestrina counterpoint generated live. Single-cycle pitch detection, 128-sample buffers, 8 harmony modes, 28 scale modes. Native via Tauri, browser via WebAssembly. Extended with contrapunk_osc_sender.rs — OSC bridge broadcasting audio events to TouchDesigner for music-reactive visuals. Built a TD docs MCP server (556 ops indexed) to accelerate the visual integration.`,
-      stack: ['Rust','Tauri','WebAssembly','OSC','TouchDesigner','Real-time Audio'],
-      accentColor: 'var(--cyan)',
-      tagClass: 'cyan',
-    },
-    {
-      file: 'Rigor-Cloud/rigor → rigorcloud.com',
-      title: 'Rigorcloud',
-      type: 'LLM SAFETY · RUST · OPA/REGO · AI',
-      desc: 'MITM proxy that fact-checks LLM responses mid-stream against Rego policy constraints — kills violating streams and auto-retries with correction feedback. Works with Claude Code, OpenCode. Regorus (pure-Rust OPA engine) for local policy eval. Zero telemetry, Apache 2.0.',
-      stack: ['Rust','OPA/Rego','LLM Safety','MITM Proxy','Claude API'],
-      accentColor: 'var(--gold)',
-      tagClass: 'gold',
-    },
-  ];
 
-  const projectCats = ['All', 'AI', 'Backend', 'Health', 'Quant', 'Audio'];
-  let activeCat = $state('All');
-
-  // architecture modal (project-card grid) + rich viz modal (featured tiles)
-  let archOpen = $state(false);
-  let archKey  = $state(null);
-  function openArch(k) { archKey = k; archOpen = true; }
 
   let vizOpen = $state(false);
   let vizProject = $state(null);
   function openViz(p) { vizProject = p; vizOpen = true; }
 
-  const projects = [
-    {
-      file: 'champiq-sim/canvas.tsx', wide: true, category: 'AI',
-      type: '// AI · SDR Automation · Knowledge Graph', color: 'cyan',
-      title: 'ChampIQ — AI-native SDR canvas',
-      hook: 'Own the prospect data, the AI voice, and the compliance — rent the workflow engine.',
-      desc: 'A node-based outreach platform built on Sim’s durable parallel DAG runtime. Per-client knowledge graphs (ChampGraph), signal-grounded personalization, an SDR email engine (ChampMail), consent-gated AI calling (ChampVoice), and a "zerolang" checked-edit guardrail that validates every AI Copilot edit — graph-hash precondition + type checks + a consent/compliance capability gate. Re-platforming onto Sim let the team stop maintaining a workflow engine and build the defensible moat on top.',
-      why: 'Signal-based personalization lifts reply rates to ~15–25% vs 3–5% for templates (3–5×). Built as the marketing/SDR product line for ChampionsGroup; shipped as the champiq-sim-pack reference implementation.',
-      context: { label: 'Freelance · ChampionsGroup', cls: 'cyan' },
-      stack: ['Sim (Apache-2.0)','Knowledge Graph','Claude','ChampMail','ChampVoice','React/TS'],
-      metrics: [{ t: '3–5× reply lift', c: 'm-cyan' },{ t: '~245-block engine', c: 'm-cyan' },{ t: 'consent-gated AI', c: 'm-cyan' }],
-      img: '/projects/champiq.png',
-      arch: ['champiq','champsim'],
-    },
-    {
-      file: 'fieldstone/main.go', wide: true, category: 'Backend',
-      type: '// Backend · Go BaaS · Open Source', color: 'gold',
-      title: 'Fieldstone — in-house PocketBase alternative',
-      hook: 'A self-hosted Go BaaS — PocketBase × Supabase, but Postgres-first with real row-level security.',
-      desc: 'A single Go binary that is a whole backend: auto-REST + GraphQL + gRPC over real Postgres tables, JWT auth (token-key rotation + WebAuthn passkeys), a goroutine worker-pool job queue, a realtime WebSocket hub (one select-loop goroutine fanning out to thousands of clients), WASM plugins (wazero) for sandboxed custom logic, an edge-functions sidecar, cron, storage, token-bucket rate limiting, drop-in domain "packs" (healthcare/saas/marketing) shipping schema + RLS, and a React admin. Where PocketBase treats multi-tenancy as an afterthought, Fieldstone makes tenant isolation + real Postgres RLS first-class — applied per-request inside a transaction.',
-      why: 'My own open-source contribution: an in-house "Supabase you own" for data residency (India/DPDP), cost at scale, and deep customization (WASM/GraphQL/gRPC). Reusable infra under the ChampionsGroup products — not yet pushed upstream to PocketBase.',
-      context: { label: 'In-house · Open source', cls: 'gold' },
-      stack: ['Go 1.25','chi','pgx · Postgres','gRPC','wazero WASM','GraphQL','WebSocket'],
-      metrics: [{ t: 'REST + GraphQL + gRPC', c: 'm-gold' },{ t: 'Postgres RLS in-tx', c: 'm-gold' },{ t: 'WASM plugins', c: 'm-gold' }],
-      arch: ['fieldstone'],
-      viz: '/fieldstone-concurrency.html',
-      repo: 'https://github.com/lowkeyparanoia/fieldstone',
-    },
-    {
-      file: '100xlongevity/score.ts', wide: true, category: 'Health',
-      type: '// Health · Wearables · Physician AI', color: 'green',
-      title: '100xLongevity — clinical longevity platform',
-      hook: 'Turn a physical wellness facility into a measurable score — and keep members engaged between visits.',
-      desc: 'A longevity platform (Expo + Next.js + Supabase) for a physical facility: a Daily Vitality Score (0–100) z-scored against each user’s own 30-day baseline, a stack of 8 Biological Ages derived from biomarkers via auditable deterministic tables (no black-box ML — trust before automation), and a gamified Longevity Progress Score (0–1000). Ingests wearables (Fitbit/Oura/Whoop/Garmin), on-device CV pose scoring, lab-report OCR, and Zoom physician consultations where every AI suggestion is physician-approval-gated.',
-      why: 'Built for the Indian market with DPDPA-2023 data residency by design — health data and local AI never leave facility infra. I own the frontend logic layer (score gauges, age tiles, device + Zoom-consult UIs) in the Champ-Deep org.',
-      context: { label: 'Team · Champ-Deep', cls: 'green' },
-      stack: ['React Native','Expo','Next.js','Supabase','Zoom','pg_cron','Ollama (Phi-4)'],
-      metrics: [{ t: '0–1000 longevity score', c: 'm-green' },{ t: '8 biological ages', c: 'm-green' },{ t: 'DPDPA-compliant', c: 'm-green' }],
-    },
-    {
-      file: 'hospital-portal.py', wide: false, category: 'Health',
-      type: '// Fullstack · PWA · AI', color: 'green',
-      title: 'Hospital Patient Portal',
-      desc: 'High-performance PWA modernising patient care. Sub-2s loads, real-time "Health Bubble" messaging, fault-tolerant Razorpay payment gateway, 3D UI, AI chatbot integration.',
-      stack: ['React 19','FastAPI','PostgreSQL','Razorpay','WebSocket'],
-      metrics: [{ t: '−30% admin overhead', c: 'm-green' },{ t: 'Sub-2s load time', c: 'm-green' },{ t: '100% revenue secured', c: 'm-green' }],
-    },
-    {
-      file: 'movie-rec.py', wide: false, category: 'AI',
-      type: '// Agentic AI · MCP · Data Pipeline', color: 'cyan',
-      title: 'AI Movie Recommender',
-      desc: '8-platform agentic pipeline (Twitter, Spotify, YouTube, Netflix, Steam…) extracting user preferences. TMDB critic-style recommendations via Claude API + MCP-automated git workflow.',
-      stack: ['FastAPI','Pydantic AI','Claude API','MongoDB'],
-      metrics: [{ t: '8+ platforms', c: 'm-cyan' },{ t: '10k+ profiles', c: 'm-cyan' }],
-    },
-    {
-      file: 'mugen.py', wide: false, category: 'Audio',
-      type: '// Startup · HKTECH300 · HKSTP Funded', color: 'gold',
-      title: 'MuGen — Music Generation',
-      desc: 'Gesture-based music editing via finger tracking. Google Magenta AI generation. Azure cloud offload. Dashboard A→Z for track import, AI enhancement and prolongation.',
-      stack: ['Azure','Magenta','Docker','Figma'],
-      metrics: [{ t: 'HKTECH300 funded', c: 'm-gold' },{ t: 'Best course project', c: 'm-gold' }],
-    },
-    {
-      file: 'quant-monitor.py', wide: false, category: 'Quant',
-      type: '// Quant · Semi-Automated · Research', color: 'gold',
-      title: 'Semi-Automated Quant Monitor',
-      desc: 'Personal semi-automated trading monitor — links AI global news monitors, TradingView alerts, Discord bot signal delivery, and Google Trends retail sentiment analysis to identify where crowd sentiment is clustering. Not fully automated; human-in-the-loop execution with systematic signal aggregation.',
-      stack: ['TradingView','Pine Script','Discord Bot','Google Trends','Python'],
-      metrics: [{ t: 'Semi-automated', c: 'm-gold' },{ t: 'Retail sentiment', c: 'm-gold' },{ t: 'Multi-source signals', c: 'm-gold' }],
-    },
-  ];
 
-  const filteredProjects = $derived(
-    activeCat === 'All' ? projects : projects.filter((p) => p.category === activeCat)
-  );
 
   const tradingStats = [
     { val: '2.5×',  label: 'Profit Factor',    sub: 'TradingView strategies',   cls: 'sv-green' },
@@ -282,7 +189,7 @@
 <!-- FEATURED WORK (visual hook — above the text)                -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="featured" class="section">
-  <SynthwaveGrid intensity={0.72} />
+  <SectionBg variant="synth" intensity={0.72} />
   <div class="container">
     <p class="sec-label">featured_work</p>
     <h2 class="sec-title">Selected <span>builds</span> — explore the architecture</h2>
@@ -295,10 +202,11 @@
 <!-- EXPERIENCE                                                  -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="experience" class="section alt">
+  <SectionBg variant="solid" />
   <div class="container">
     <p class="sec-label">work_experience</p>
     <h2 class="sec-title">Where I've <span>shipped</span></h2>
-    <p class="sec-sub">Backend, ML, cloud architecture across Hong Kong and Dubai.</p>
+    <p class="sec-sub">Backend, ML and cloud across Hong Kong &amp; Dubai — and the open-source systems I build.</p>
     <div class="exp-grid">
       {#each experience as exp}
         <div class="exp-item reveal">
@@ -313,6 +221,7 @@
                 <div>
                   <span class="exp-company">{exp.company}</span>
                   <span class="exp-role"> // {exp.role}</span>
+                  {#if exp.badge}<span class="exp-badge">◆ {exp.badge}</span>{/if}
                 </div>
                 <div class="exp-meta">
                   <span class="tag">{exp.period}</span>
@@ -338,81 +247,17 @@
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- OPEN SOURCE                                                 -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<section id="opensource" class="section">
-  <SynthwaveGrid intensity={0.72} />
-  <div class="container">
-    <p class="sec-label">open_source</p>
-    <h2 class="sec-title">Open Source <span>Contributions</span></h2>
-    <p class="sec-sub">Production contributions to real-world Rust tooling and audio tech.</p>
-    <div class="oss-grid reveal">
-      {#each oss as o}
-        <div class="term oss-card">
-          <div class="term-bar">
-            <span class="term-btn r"></span><span class="term-btn y"></span><span class="term-btn g"></span>
-            <span class="term-title">{o.file}</span>
-          </div>
-          <div class="oss-inner" style="--accent:{o.accentColor}">
-            <div class="oss-accent-bar"></div>
-            <div class="oss-body">
-              <div class="oss-title">{o.title}</div>
-              <div class="oss-type">{o.type}</div>
-              <div class="oss-desc">{o.desc}</div>
-              <div class="oss-stack">
-                {#each o.stack as s}
-                  <span class="tag {o.tagClass}">{s}</span>
-                {/each}
-              </div>
-            </div>
-          </div>
-        </div>
-      {/each}
-    </div>
-  </div>
-</section>
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- PROJECTS                                                    -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<section id="projects" class="section alt">
-  <div class="container">
-    <p class="sec-label">projects</p>
-    <h2 class="sec-title">Things I've <span>built</span></h2>
-    <p class="sec-sub">AI systems, fullstack apps, quant tools, music tech — and the engineering I do for <span style="color:var(--cyan)">ChampionsGroup</span>.</p>
-
-    <!-- ChampionsGroup context band -->
-    <div class="cg-band reveal">
-      <span class="cg-k">// building under ChampionsGroup (Champ-Deep):</span>
-      <span class="cg-row"><b style="color:var(--cyan)">ChampIQ</b> — freelance SDR/marketing automation deliverable.</span>
-      <span class="cg-row"><b style="color:var(--gold)">Fieldstone</b> — my in-house, open-source PocketBase alternative the products can run on.</span>
-      <span class="cg-row"><b style="color:var(--green)">100xLongevity</b> — a clinical longevity product I build the frontend layer for.</span>
-    </div>
-
-    <!-- filter chips -->
-    <div class="proj-filter reveal" role="tablist" aria-label="Filter projects">
-      {#each projectCats as c}
-        <button class="chip" class:on={activeCat === c} role="tab" aria-selected={activeCat === c}
-          onclick={() => (activeCat = c)}>{c}</button>
-      {/each}
-    </div>
-
-    <div class="proj-bento">
-      {#each filteredProjects as p (p.title)}
-        <div class="proj-cell" class:wide={p.wide} animate:flip={{ duration: 320 }}>
-          <ProjectCard {p} onViewArch={openArch} />
-        </div>
-      {/each}
-    </div>
-  </div>
-</section>
-
-<ArchModal bind:open={archOpen} diagramKey={archKey} />
 <ProjectVizModal bind:open={vizOpen} project={vizProject} />
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- TRADING                                                     -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="trading" class="section">
-  <SynthwaveGrid intensity={0.72} />
+  <SectionBg variant="glow" />
   <div class="container">
     <p class="sec-label">trading_and_finance</p>
     <h2 class="sec-title">Quantitative <span>Edge</span></h2>
@@ -462,6 +307,7 @@
 <!-- HEALTHCARE                                                  -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="healthcare" class="section alt">
+  <SectionBg variant="synth" intensity={0.65} />
   <div class="container">
     <p class="sec-label">healthcare_ai</p>
     <h2 class="sec-title">Healthcare <span>Intelligence</span></h2>
@@ -503,7 +349,7 @@
 <!-- MUSIC                                                       -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="music" class="section">
-  <SynthwaveGrid intensity={0.72} />
+  <SectionBg variant="solid" />
   <div class="container">
     <p class="sec-label">music_tech</p>
     <h2 class="sec-title">Music <span>Technology</span></h2>
@@ -549,6 +395,7 @@
 <!-- AV WORK / PROJECTION MAPPING                               -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="av-work" class="section alt">
+  <SectionBg variant="glow" />
   <div class="container">
     <p class="sec-label">// Visual Arts · AV · Projection Mapping</p>
     <h2 class="sec-title">Projection Mapping &amp; <span>Visual Performance</span></h2>
@@ -636,7 +483,7 @@
 <!-- ACHIEVEMENTS                                               -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="about" class="section">
-  <SynthwaveGrid intensity={0.72} />
+  <SectionBg variant="solid" />
   <div class="container">
     <p class="sec-label">achievements</p>
     <h2 class="sec-title">Track <span>Record</span></h2>
@@ -663,7 +510,7 @@
 <!-- DIGITAL / AR CARD                                          -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="card" class="section">
-  <SynthwaveGrid intensity={1} />
+  <SectionBg variant="synth" intensity={1} />
   <div class="container">
     <p class="sec-label">digital_card</p>
     <h2 class="sec-title">My card, in <span>3D</span> &amp; <span>AR</span></h2>
@@ -678,7 +525,7 @@
 <!-- CONTACT                                                    -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="contact" class="section alt">
-  <SynthwaveGrid intensity={0.72} />
+  <SectionBg variant="glow" />
   <div class="container">
     <div class="contact-grid reveal">
       <div class="term contact-term">
@@ -712,7 +559,7 @@
         <div class="term-body">
           <p class="prompt" style="margin-bottom:12px">cat about.txt</p>
           <p class="profile-name">Jrenoth Misquith</p>
-          <p class="profile-detail">BSc Computer Science · Data Science<br>City University of Hong Kong</p>
+          <p class="profile-detail">BSc Computer Science</p>
           <p class="profile-detail" style="margin-top:8px">
             Languages: English (IELTS 8.5) · Kannada · Konkani · Hindi
           </p>
@@ -812,6 +659,12 @@
 }
 .exp-company { color: var(--green); font-weight: 700; font-size: 1rem; }
 .exp-role    { color: var(--text-mute); font-size: 0.88rem; }
+.exp-badge   {
+  display: inline-block; margin-left: 8px; font-family: var(--font);
+  font-size: 0.6rem; letter-spacing: 0.08em; color: var(--cyan);
+  border: 1px solid var(--cyan-d); border-radius: 3px; padding: 1px 7px;
+  vertical-align: middle; white-space: nowrap;
+}
 .exp-meta    { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .exp-loc     { font-size: 0.72rem; color: var(--text-mute); }
 .exp-stack   { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
@@ -994,12 +847,9 @@
 @media (max-width: 900px) {
   .hero { padding-top: 56px; }
   .trading-wrap { grid-template-columns: 1fr; }
-  .oss-grid     { grid-template-columns: 1fr; }
   .health-grid  { grid-template-columns: 1fr; }
   .music-grid   { grid-template-columns: 1fr; }
   .contact-grid { grid-template-columns: 1fr; }
-  .proj-bento   { grid-template-columns: 1fr; }
-  .proj-cell.wide { grid-column: span 1; }
   .av-feature-body { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {

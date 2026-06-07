@@ -112,4 +112,14 @@
   .ar-sub { font-family: var(--font); font-size: 0.66rem; color: var(--text-mute); letter-spacing: 0.04em; }
 
   @media (prefers-reduced-motion: reduce) { .card-tilt { transition: none; } }
+
+  @media (max-width: 430px) {
+    .card-scene { height: 190px; }
+    .ar-btn { font-size: 10.5px; padding: 11px 14px; text-align: center; line-height: 1.4; }
+    .ar-sub { text-align: center; }
+  }
+  @media (max-width: 360px) {
+    .face { padding: 13px 13px; }
+    .cname { font-size: 17px; }
+  }
 </style>

@@ -89,4 +89,11 @@
   .ls-mid  { background: var(--cyan); }      .ls-age-v.ls-mid  { color: var(--cyan); }
   .ls-age-v { font-family: var(--sans); font-weight: 700; font-size: 0.85rem; text-align: right; }
   .ls-age-v small { font-size: 0.6rem; color: var(--text-mute); font-weight: 400; }
+
+  @media (max-width: 480px) {
+    .ls-top { gap: 14px; }
+    .ls-blurb { min-width: 0; }
+    .ls-age { grid-template-columns: 88px 1fr 38px; gap: 8px; }
+    .ls-age-k { font-size: 0.66rem; }
+  }
 </style>

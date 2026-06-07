@@ -118,6 +118,16 @@ a:hover { color: var(--cyan); }
   margin-bottom: 52px; max-width: 540px;
 }
 
+/* ── Global mobile tightening ──────────────────────── */
+@media (max-width: 640px) {
+  .container { padding: 0 18px; }
+  .section   { padding: 64px 0; }
+  .sec-sub   { margin-bottom: 36px; }
+}
+@media (max-width: 380px) {
+  .container { padding: 0 14px; }
+}
+
 /* ── Reveal on scroll ─────────────────────────────── */
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s, transform .6s; }
 .reveal.visible { opacity: 1; transform: none; }
