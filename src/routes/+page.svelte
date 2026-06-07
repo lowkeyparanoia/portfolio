@@ -2,10 +2,11 @@
   import { onMount }         from 'svelte';
   import { fly, fade }       from 'svelte/transition';
   import { base }            from '$app/paths';
-  import FeaturedWork        from '$lib/components/FeaturedWork.svelte';
+  import Carousel3D          from '$lib/components/Carousel3D.svelte';
   import ProjectVizModal     from '$lib/components/ProjectVizModal.svelte';
   import ArCard              from '$lib/components/ArCard.svelte';
   import SectionBg           from '$lib/components/SectionBg.svelte';
+  import Meteors             from '$lib/components/Meteors.svelte';
   import MatrixRain          from '$lib/components/MatrixRain.svelte';
   import CandlestickChart    from '$lib/components/CandlestickChart.svelte';
   import WaveformCanvas      from '$lib/components/WaveformCanvas.svelte';
@@ -193,7 +194,7 @@
     <p class="sec-label">featured_work</p>
     <h2 class="sec-title">Selected <span>builds</span> — explore the architecture</h2>
     <p class="sec-sub">Four flagship systems, each with a live visual and an interactive diagram. Click into the architecture before reading a word.</p>
-    <FeaturedWork onOpenViz={openViz} />
+    <Carousel3D onOpenViz={openViz} />
   </div>
 </section>
 
@@ -510,6 +511,7 @@
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="card" class="section">
   <SectionBg variant="synth" intensity={1} />
+  <Meteors count={20} />
   <div class="container">
     <p class="sec-label">digital_card</p>
     <h2 class="sec-title">My card, in <span>3D</span> &amp; <span>AR</span></h2>
