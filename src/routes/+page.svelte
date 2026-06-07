@@ -4,7 +4,10 @@
   import { flip }            from 'svelte/animate';
   import { base }            from '$app/paths';
   import ProjectCard         from '$lib/components/ProjectCard.svelte';
+  import FeaturedWork        from '$lib/components/FeaturedWork.svelte';
   import ArchModal           from '$lib/components/ArchModal.svelte';
+  import ProjectVizModal     from '$lib/components/ProjectVizModal.svelte';
+  import ArCard              from '$lib/components/ArCard.svelte';
   import MatrixRain          from '$lib/components/MatrixRain.svelte';
   import CandlestickChart    from '$lib/components/CandlestickChart.svelte';
   import WaveformCanvas      from '$lib/components/WaveformCanvas.svelte';
@@ -116,10 +119,14 @@
   const projectCats = ['All', 'AI', 'Backend', 'Health', 'Quant', 'Audio'];
   let activeCat = $state('All');
 
-  // architecture modal
+  // architecture modal (project-card grid) + rich viz modal (featured tiles)
   let archOpen = $state(false);
   let archKey  = $state(null);
   function openArch(k) { archKey = k; archOpen = true; }
+
+  let vizOpen = $state(false);
+  let vizProject = $state(null);
+  function openViz(p) { vizProject = p; vizOpen = true; }
 
   const projects = [
     {
@@ -296,6 +303,18 @@
 </section>
 
 <!-- ══════════════════════════════════════════════════════════ -->
+<!-- FEATURED WORK (visual hook — above the text)                -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="featured" class="section">
+  <div class="container">
+    <p class="sec-label">featured_work</p>
+    <h2 class="sec-title">Selected <span>builds</span> — explore the architecture</h2>
+    <p class="sec-sub">Four flagship systems, each with a live visual and an interactive diagram. Click into the architecture before reading a word.</p>
+    <FeaturedWork onOpenViz={openViz} />
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
 <!-- EXPERIENCE                                                  -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="experience" class="section alt">
@@ -409,6 +428,7 @@
 </section>
 
 <ArchModal bind:open={archOpen} diagramKey={archKey} />
+<ProjectVizModal bind:open={vizOpen} project={vizProject} />
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- TRADING                                                     -->
@@ -678,6 +698,20 @@
           </div>
         </div>
       {/each}
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- DIGITAL / AR CARD                                          -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="card" class="section">
+  <div class="container">
+    <p class="sec-label">digital_card</p>
+    <h2 class="sec-title">My card, in <span>3D</span> &amp; <span>AR</span></h2>
+    <p class="sec-sub">A paper-free business card — tilt it with your cursor or finger, flip it for links and stack, then drop it into real space in AR.</p>
+    <div class="card-wrap reveal">
+      <ArCard />
     </div>
   </div>
 </section>
@@ -953,6 +987,9 @@
   font-size: 0.78rem; transition: border-color 0.2s, color 0.2s;
 }
 .sk-item:hover { border-color: var(--green); color: var(--green); }
+
+/* ── DIGITAL / AR CARD ─────────────────────────────────────── */
+.card-wrap { display: flex; justify-content: center; padding: 16px 0 4px; }
 
 /* ── CONTACT ───────────────────────────────────────────────── */
 .contact-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }

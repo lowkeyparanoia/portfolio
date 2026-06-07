@@ -6,6 +6,7 @@
   let activeId  = $state('');
 
   const links = [
+    { href: '#featured',   label: 'work'        },
     { href: '#experience', label: 'experience' },
     { href: '#opensource', label: 'open_source' },
     { href: '#projects',   label: 'projects'    },

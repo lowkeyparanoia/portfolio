@@ -110,4 +110,79 @@ export const architectures = {
       e('rls', 'commit', C.violet),
     ],
   },
+
+  // ── 100xLongevity — secrets stay server-side; Zoom via S2S OAuth edge fn ──
+  longevity: {
+    title: '100xLongevity — trust boundary + Zoom consults',
+    subtitle: 'No third-party token ever ships to a client; AI suggestions are physician-gated',
+    nodes: [
+      n('mobile', 'Expo mobile\n+ Next.js web', 0, 60, C.cyan, { w: 150 }),
+      n('auth', 'Supabase Auth\nOTP → JWT', 250, 60, C.green),
+      n('pg', 'Postgres + RLS\nbiomarkers · scores', 250, 200, C.violet),
+      n('edge', 'Edge Functions (Deno)\nvideo-token · score · sms', 520, 130, C.gold, { w: 200 }),
+      n('zoom', 'Zoom API\nS2S OAuth', 820, 60, C.blue),
+      n('wear', 'Fitbit / Oura\nwearables', 820, 200, C.orange),
+      n('cron', 'pg_cron\ndaily score compute', 520, 280, C.grey, { w: 200 }),
+    ],
+    edges: [
+      e('mobile', 'auth', C.cyan),
+      e('mobile', 'pg', C.cyan, { label: 'RLS reads/writes' }),
+      e('mobile', 'edge', C.green, { label: 'JWT' }),
+      e('edge', 'pg', C.gold, { label: 'service role' }),
+      e('edge', 'zoom', C.blue),
+      e('edge', 'wear', C.orange),
+      e('cron', 'edge', C.grey),
+    ],
+  },
+
+  // ── Fieldstone — full subsystem map (one Go binary) ────────────────────
+  'fieldstone-system': {
+    title: 'Fieldstone — one Go binary, every subsystem',
+    subtitle: 'chi router fans requests into auth, gateways, realtime, jobs, plugins — all goroutine-coordinated',
+    nodes: [
+      n('in', 'HTTP / WS / gRPC', 0, 170, C.cyan),
+      n('router', 'chi router\n+ CORS + auth mw', 220, 170, C.green),
+      n('auth', 'Auth · JWT · WebAuthn', 460, 20, C.green, { w: 168 }),
+      n('rest', 'REST gateway /api/v1', 460, 100, C.gold, { w: 168 }),
+      n('gql', 'GraphQL /api/graphql', 460, 180, C.gold, { w: 168 }),
+      n('rt', 'Realtime hub /ws\nselect-loop goroutine', 460, 260, C.violet, { w: 168 }),
+      n('wasm', 'WASM plugins (wazero)', 460, 340, C.pink, { w: 168 }),
+      n('jobs', 'Job queue · workers', 460, 420, C.orange, { w: 168 }),
+      n('pg', 'Postgres + RLS', 760, 130, C.violet),
+      n('cache', 'cache · ratelimit', 760, 250, C.blue),
+      n('store', 'storage · cron · webhooks', 760, 370, C.grey, { w: 180 }),
+    ],
+    edges: [
+      e('in', 'router', C.cyan),
+      e('router', 'auth', C.green), e('router', 'rest', C.gold), e('router', 'gql', C.gold),
+      e('router', 'rt', C.violet), e('router', 'wasm', C.pink), e('router', 'jobs', C.orange),
+      e('rest', 'pg', C.gold), e('gql', 'pg', C.gold), e('rt', 'pg', C.violet),
+      e('jobs', 'store', C.orange), e('auth', 'cache', C.green),
+    ],
+  },
+
+  // ── Contrapunk — one Rust core, four surfaces ──────────────────────────
+  contrapunk: {
+    title: 'Contrapunk — one Rust core, four surfaces',
+    subtitle: 'Guitar → MIDI in <10 ms → species counterpoint → synth + CLAP host',
+    nodes: [
+      n('guitar', 'Guitar / MIDI in', 0, 150, C.gold),
+      n('audio', 'contrapunk-audio\nonset · pitch · string/fret', 220, 150, C.pink, { w: 180 }),
+      n('harm', 'contrapunk-harmony\nspecies counterpoint', 470, 150, C.cyan, { w: 180 }),
+      n('synth', '8-voice synth\n→ delay → reverb', 720, 150, C.violet, { w: 168 }),
+      n('clap', 'CLAP plugin host', 960, 150, C.green),
+      n('cli', 'CLI', 470, 30, C.grey, { w: 80 }),
+      n('tauri', 'Tauri app', 600, 30, C.grey, { w: 90 }),
+      n('web', 'WASM web', 730, 30, C.grey, { w: 100 }),
+      n('plug', 'VST3/CLAP', 870, 30, C.grey, { w: 100 }),
+    ],
+    edges: [
+      e('guitar', 'audio', C.gold),
+      e('audio', 'harm', C.pink, { label: '~2.7 ms' }),
+      e('harm', 'synth', C.cyan),
+      e('synth', 'clap', C.violet),
+      e('harm', 'cli', C.grey, { animated: false }), e('harm', 'tauri', C.grey, { animated: false }),
+      e('harm', 'web', C.grey, { animated: false }), e('harm', 'plug', C.grey, { animated: false }),
+    ],
+  },
 };

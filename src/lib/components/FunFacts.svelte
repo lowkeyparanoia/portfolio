@@ -8,7 +8,7 @@
     {
       tag: 'perf',
       title: '100% static — zero server',
-      body: 'Every section is prerendered to HTML by SvelteKit (adapter-static) and served from GitHub Pages. No backend, no database — just files on a CDN, so it loads in well under a second.'
+      body: 'Shipped as a static single-page app (SvelteKit + adapter-static) on GitHub Pages. No backend, no database — just files on a CDN, so it loads in well under a second.'
     },
     {
       tag: 'craft',
