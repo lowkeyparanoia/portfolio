@@ -25,7 +25,7 @@
       repo: 'https://github.com/lowkeyparanoia/fieldstone',
     },
     {
-      key: 'longevity', visual: 'ring', score: 78,
+      key: 'longevity', visual: 'img', img: '/projects/longevity/01-home-today-dashboard.png',
       badge: { t: 'Team · Champ-Deep', c: 'green' },
       title: '100xLongevity', tagline: 'clinical longevity platform',
       hook: 'Biological-age scoring, wearables, on-device CV, and physician-gated AI consults — DPDPA-compliant.',
@@ -54,18 +54,6 @@
         {:else if f.visual === 'wave'}
           <WaveformCanvas colorA="#00e5ff" colorB="#9a6cf0" />
           <span class="fw-vtag">♪ audio-reactive</span>
-        {:else if f.visual === 'ring'}
-          <div class="fw-ring">
-            <svg viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
-              <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border)" stroke-width="8" />
-              <circle class="fw-ring-arc" cx="60" cy="60" r="50" fill="none" stroke="var(--green)"
-                stroke-width="8" stroke-linecap="round"
-                stroke-dasharray="314" stroke-dashoffset={314 - (314 * f.score) / 100}
-                transform="rotate(-90 60 60)" />
-            </svg>
-            <div class="fw-ring-num">{f.score}<span>/100</span></div>
-          </div>
-          <span class="fw-vtag">vitality score</span>
         {/if}
       </div>
 
@@ -103,12 +91,6 @@
     letter-spacing: 0.08em; color: var(--cyan); background: rgba(2,4,8,0.65);
     border: 1px solid var(--border); padding: 2px 7px; border-radius: 3px;
   }
-  /* longevity ring */
-  .fw-ring { position: relative; display: grid; place-items: center; }
-  .fw-ring-arc { animation: fw-fill 1.4s ease forwards; }
-  @keyframes fw-fill { from { stroke-dashoffset: 314; } }
-  .fw-ring-num { position: absolute; font-family: var(--sans); font-size: 1.7rem; font-weight: 800; color: var(--green); }
-  .fw-ring-num span { font-size: 0.7rem; color: var(--text-mute); font-weight: 400; }
 
   .fw-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
   .fw-badge { align-self: flex-start; font-family: var(--font); font-size: 0.58rem; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 3px; border: 1px solid var(--border2); color: var(--text-dim); }
@@ -131,5 +113,4 @@
   .fw-note { font-family: var(--font); font-size: 0.66rem; color: var(--text-mute); font-style: italic; }
 
   @media (max-width: 900px) { .fw-grid { grid-template-columns: 1fr; } }
-  @media (prefers-reduced-motion: reduce) { .fw-ring-arc { animation: none; } }
 </style>
