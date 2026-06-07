@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fieldstone — Go Concurrency, Visualized (vs PocketBase · in-house BaaS)</title>
+<script src="https://cdn.jsdelivr.net/npm/motion@11/dist/motion.umd.js"></script>
+<style>
+  :root{
+    --bg:#08110F; --panel:#0E1A17; --panel2:#13221E; --line:#23362F;
+    --go:#00ADD8; --go2:#5DC9E2; --gopher:#79D4E8; --ink:#E9F4F1; --mut:#8FB2AB; --mut2:#557068;
+    --green:#46D19A; --amber:#E3B341; --red:#E5675B; --blue:#5BC0FF; --violet:#9C7BF0; --gold:#E3B341;
+    --mono:"SF Mono",ui-monospace,"Cascadia Code",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#0f201c 0,var(--bg) 60%);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+  header.doc{padding:40px 28px 22px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#0a1512,transparent)}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--go);opacity:.95}
+  h1{font-size:28px;margin:10px 0 6px;font-weight:760;letter-spacing:-.01em}
+  h1 span{color:var(--go2)}
+  .sub{color:var(--mut);max-width:920px;font-size:15px}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 22px}
+  nav.tabs{position:sticky;top:0;z-index:30;background:rgba(8,17,15,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px}
+  nav.tabs button{font-family:var(--mono);font-size:12px;letter-spacing:.03em;color:var(--mut);background:transparent;border:1px solid transparent;border-radius:8px;padding:9px 12px;cursor:pointer;transition:.15s;white-space:nowrap}
+  nav.tabs button:hover{color:var(--ink);background:var(--panel)}
+  nav.tabs button.active{color:#04181d;background:var(--go);font-weight:700}
+  section{display:none;padding:28px 0 70px}
+  section.active{display:block}
+  h2{font-size:22px;margin:6px 0 4px;letter-spacing:-.01em}
+  h3{font-size:16px;margin:24px 0 8px;color:var(--go2)}
+  h4{font-size:13px;margin:16px 0 6px;color:var(--ink);font-family:var(--mono);letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+  p,li{font-size:14.5px;color:#D2E4DF}
+  .lead{color:var(--mut);font-size:15px;margin-bottom:8px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:14px 0}
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:820px){.g2,.g3{grid-template-columns:1fr}}
+  .tag{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:6px;border:1px solid var(--line);color:var(--mut);margin:2px 4px 2px 0}
+  .tag.ok{color:var(--green);border-color:#1f4a3a;background:#0a1a14}
+  .tag.go{color:var(--go);border-color:#0a4a5a;background:#06222a}
+  .tag.bad{color:var(--red);border-color:#5a2030;background:#1a0c12}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);font-weight:600}
+  tr:hover td{background:#0c1916}
+  .win{color:var(--green);font-weight:600}.bd{color:var(--red);font-weight:600}.wn{color:var(--amber);font-weight:600}
+  pre{background:#06100d;border:1px solid var(--line);border-left:3px solid var(--go);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:12px 0}
+  code{font-family:var(--mono);font-size:12.5px;color:#BFD8D1}
+  .cm{color:#557068}.kw{color:#79D4E8}.str{color:#9ecf8a}.fn{color:#E3B341}.num{color:#d6a0ff}.ty{color:#5BC0FF}
+  ul{margin:6px 0 6px 2px;padding-left:18px}ul li{margin:5px 0}
+  .callout{border-radius:12px;padding:14px 16px;margin:14px 0;border:1px solid}
+  .callout.warn{border-color:#5a2030;background:#160b0a}.callout.warn b{color:var(--red)}
+  .callout.note{border-color:#0a4a5a;background:#06181d}.callout.note b{color:var(--go)}
+  .callout.good{border-color:#1f4a3a;background:#0a1a14}.callout.good b{color:var(--green)}
+  .rec{border:1px solid #0a4a5a;background:linear-gradient(180deg,#08201f,#0a1512);border-radius:12px;padding:14px 16px;margin:14px 0}
+  .rec h4{color:var(--go2);margin-top:0}
+  hr{border:0;border-top:1px solid var(--line);margin:26px 0}
+  .foot{color:var(--mut2);font-size:12px;text-align:center;padding:28px 0}
+  .flow{font-family:var(--mono);font-size:12px;color:var(--mut);background:#06100d;border:1px solid var(--line);border-radius:10px;padding:13px 15px;margin:10px 0;line-height:2;overflow-x:auto}
+  .flow b{color:var(--go2)}.flow .g{color:var(--green)}.flow .c{color:var(--gopher)}.flow .r{color:var(--red)}
+  .small{font-size:12.5px;color:var(--mut)}
+  /* interactive demo shells */
+  .demo{background:#06100d;border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+  .ctrls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .btn{font-family:var(--mono);font-size:12px;font-weight:700;border:none;border-radius:8px;padding:9px 14px;cursor:pointer;background:var(--go);color:#04181d}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn:active{transform:translateY(1px)}
+  .chk{font-family:var(--mono);font-size:11.5px;color:var(--mut);display:flex;align-items:center;gap:6px;cursor:pointer}
+  .stat{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-left:auto}
+  .stat b{color:var(--go2)}
+  /* goroutine pool */
+  .pool{display:flex;flex-wrap:wrap;gap:7px;min-height:90px;align-content:flex-start;border:1px dashed var(--line);border-radius:10px;padding:12px;background:#08130f}
+  .grt{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--go2),var(--go));display:flex;align-items:center;justify-content:center;font-size:9px;color:#04181d;font-weight:800;font-family:var(--mono)}
+  @keyframes pop{0%{opacity:0;transform:scale(.3)}70%{transform:scale(1.15)}100%{opacity:1;transform:scale(1)}}
+  .grt{animation:pop .4s both}
+  .membar{height:12px;border-radius:6px;background:#13221E;overflow:hidden;margin:4px 0}
+  .membar>i{display:block;height:100%;border-radius:6px}
+  /* hub */
+  .hub{display:grid;grid-template-columns:140px 1fr;gap:14px;align-items:center}
+  .chans{display:flex;flex-direction:column;gap:8px}
+  .chan{font-family:var(--mono);font-size:10px;border:1px solid var(--line);border-radius:7px;padding:7px 8px;color:var(--mut);background:#08130f;transition:.2s}
+  .chan.hot{border-color:var(--go);color:var(--go2);box-shadow:0 0 0 4px rgba(0,173,216,.12)}
+  .loopbox{font-family:var(--mono);font-size:11px;text-align:center;border:1.5px solid var(--go);border-radius:10px;padding:10px;color:var(--go2);background:#06222a;margin-bottom:10px;transition:.2s}
+  .loopbox.pulse{box-shadow:0 0 0 6px rgba(0,173,216,.16)}
+  .room{display:flex;gap:8px;flex-wrap:wrap}
+  .cl{width:46px;height:46px;border-radius:10px;border:1px solid var(--line);background:#08130f;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:var(--mut);transition:.25s}
+  .cl .id{font-size:9px;color:var(--ink)}
+  .cl.recv{border-color:var(--green);background:#0a1a14;color:var(--green);box-shadow:0 0 0 3px rgba(70,209,154,.14)}
+  .cl.slow{border-color:var(--red);background:#160b0a;color:var(--red)}
+  .cl.drop{border-color:var(--red);opacity:.5}
+  /* worker pool */
+  .slots{display:flex;gap:10px;margin:8px 0}
+  .slot{flex:1;height:54px;border:1px dashed var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:var(--mut2);background:#08130f;transition:.25s}
+  .slot.busy{border-style:solid;border-color:var(--go);color:var(--go2);background:#06222a}
+  .queue{display:flex;gap:6px;flex-wrap:wrap;min-height:34px;margin-top:8px}
+  .job{font-family:var(--mono);font-size:10px;padding:6px 10px;border-radius:7px;border:1px solid var(--line);background:#13221E;color:var(--mut)}
+  .job.run{border-color:var(--go);color:var(--go2)}.job.done{border-color:var(--green);color:var(--green);opacity:.6}
+  /* rwmutex */
+  .rw{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .reader,.writer{font-family:var(--mono);font-size:10px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:#08130f;color:var(--mut)}
+  .reader.active{border-color:var(--green);color:var(--green);background:#0a1a14}
+  .writer.active{border-color:var(--amber);color:var(--amber);background:#1a1408}
+  .blocked{opacity:.4}
+  .reveal{opacity:0;transform:translateY(10px)}.reveal.shown{opacity:1;transform:none;transition:.5s}
+  /* motion.dev feature demos (08) */
+  .rls-track{position:relative;display:flex;gap:8px;margin:16px 0 14px}
+  .rls-stage{flex:1;text-align:center;font-family:var(--mono);font-size:10px;color:var(--mut);border:1px solid var(--line);border-radius:9px;padding:11px 6px;background:#08130f;transition:.25s;line-height:1.4}
+  .rls-stage.hot{border-color:var(--go);color:var(--go2);background:#06222a;box-shadow:0 0 0 4px rgba(0,173,216,.12)}
+  .rls-token{position:absolute;top:-7px;left:0;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--go2),var(--go));box-shadow:0 0 10px var(--go)}
+  .rls-rows{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+  .rls-rrow{font-family:var(--mono);font-size:10px;padding:6px 9px;border-radius:7px;border:1px solid var(--line);background:#13221E;color:var(--mut)}
+  .rls-rrow.keep{border-color:var(--green);color:var(--green);background:#0a1a14}
+  .rls-rrow.drop{border-color:var(--red);color:var(--red)}
+  .wasm-row{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:14px 0}
+  .wasm-io{font-family:var(--mono);font-size:12px;text-align:center;padding:14px 10px;border:1px solid var(--line);border-radius:9px;background:#08130f;color:var(--ink);overflow:hidden}
+  .wasm-box{font-family:var(--mono);font-size:11px;text-align:center;padding:14px 18px;border:1.5px solid var(--violet);border-radius:10px;background:#120a1f;color:var(--violet);line-height:1.4}
+  .bucket{display:flex;flex-wrap:wrap;gap:7px;min-height:44px;padding:11px;border:1px dashed var(--line);border-radius:10px;background:#08130f;margin:8px 0}
+  .tok{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#9be7ff,var(--go));box-shadow:0 0 6px rgba(0,173,216,.5)}
+</style>
+</head>
+<body>
+<header class="doc">
+  <div class="wrap">
+    <div class="kicker">Fieldstone · Go concurrency, visualized · vs PocketBase · in-house BaaS · Jun 2026</div>
+    <h1>How <span>Fieldstone</span> works — Go's goroutines, channels &amp; sync, made <span>clickable</span></h1>
+    <p class="sub">Grounded in the real Go source (<code>lowkeyparanoia/fieldstone</code> — the <code>main</code> BaaS; the <code>feature/champiq-vite</code> branch is the React/TS UI port). Press the buttons: watch goroutines spawn, an event broadcast through the realtime hub's <code>select</code> loop, and a worker pool bound by a semaphore. Then how it compares to PocketBase and where it fits as an in-house backend for 100xLongevity, champiq-sim-pack, and beyond.</p>
+    <div style="margin-top:10px">
+      <span class="tag go">Go single-binary BaaS</span>
+      <span class="tag ok">interactive · Motion.js</span>
+      <span class="tag">real source: hub · job pool · RWMutex</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs wrap" style="max-width:1100px">
+  <button class="active" data-t="overview">01 · OVERVIEW</button>
+  <button data-t="goroutines">02 · GOROUTINES</button>
+  <button data-t="channels">03 · CHANNELS + SELECT</button>
+  <button data-t="sync">04 · SYNC &amp; WORKERS</button>
+  <button data-t="features">05 · FEATURES</button>
+  <button data-t="pocketbase">06 · VS POCKETBASE</button>
+  <button data-t="inhouse">07 · IN-HOUSE BaaS</button>
+  <button data-t="motion">08 · MOTION ✦</button>
+</nav>
+
+<div class="wrap">
+
+<!-- ===== 01 OVERVIEW ===== -->
+<section id="overview" class="active">
+  <h2>What Fieldstone is</h2>
+  <p class="lead">A <b>single Go binary</b> that gives you a whole backend — REST + GraphQL + gRPC APIs, auth (incl. WebAuthn), realtime over WebSockets, a Postgres/SQLite data layer, file storage, background jobs, caching, rate-limiting, WASM plugins, webhooks, cron, and an admin UI. A PocketBase-style BaaS, written to lean on Go's concurrency.</p>
+
+  <div class="flow">
+                       ┌──────────────── one Go binary ────────────────┐
+HTTP / WS / gRPC  ──▶  │ gateway(REST+GraphQL) · auth · <b>realtime hub</b>   │
+                       │ <b>job queue</b> · cache · ratelimit · storage · cron │  ──▶  Postgres / SQLite
+                       │ WASM plugins · webhooks · import/export        │  ──▶  Redis (optional)
+                       └────────────────────────────────────────────────┘
+   every box above is goroutines + channels coordinating — that's the story of this doc</div>
+
+  <h3>Why Go is the right language for this</h3>
+  <div class="grid g3">
+    <div class="card reveal"><h4>One binary, zero runtime</h4><p class="small">Go compiles to a single static executable — no Node/Python runtime to install, no <code>node_modules</code>. <code>docker build</code> → a ~25MB image. Trivial to self-host.</p></div>
+    <div class="card reveal"><h4>Concurrency is built-in</h4><p class="small">Goroutines + channels are language primitives, not a library. A BaaS is inherently concurrent (many sockets, jobs, requests at once) — Go makes that cheap and safe.</p></div>
+    <div class="card reveal"><h4>Fast + predictable</h4><p class="small">Compiled, GC'd, great at I/O concurrency. Handles thousands of live WebSocket clients on modest hardware — exactly a realtime BaaS's job.</p></div>
+  </div>
+  <div class="callout note"><b>The two branches:</b> <code>main</code> = the Go BaaS (what this doc visualizes). <code>feature/champiq-vite</code> = a Vite + React 18 + TypeScript port of the ChampIQ design-system UI (the latest push) — front-end only, it rides on a backend like this one. There's also <code>feature/baas-gateway-graphql</code> (the GraphQL gateway work) and <code>feature/admin-design-system</code>.</div>
+</section>
+
+<!-- ===== 02 GOROUTINES ===== -->
+<section id="goroutines">
+  <h2>Goroutines — concurrency that's nearly free</h2>
+  <p class="lead">A <b>goroutine</b> is a function running concurrently, scheduled by the Go runtime — not the OS. You start one with the keyword <code>go</code>. They're tiny (~2KB stack that grows on demand) vs an OS thread (~1MB), so you can run <i>hundreds of thousands</i>. Fieldstone spawns two per WebSocket client.</p>
+
+  <pre><code><span class="cm">// internal/realtime/manager.go — two goroutines per connected client</span>
+<span class="kw">func</span> (m *Manager) <span class="fn">HandleWebSocket</span>(w http.ResponseWriter, r *http.Request) {
+  conn, _ := m.upgrader.Upgrade(w, r, nil)
+  client := &Client{ ID: <span class="fn">generateClientID</span>(), Conn: conn, Send: <span class="kw">make</span>(<span class="kw">chan</span> []<span class="ty">byte</span>, <span class="num">256</span>) }
+  m.register <- client
+  <span class="kw">go</span> client.<span class="fn">readPump</span>()    <span class="cm">// goroutine 1: socket → hub</span>
+  <span class="kw">go</span> client.<span class="fn">writePump</span>()   <span class="cm">// goroutine 2: hub → socket</span>
+}</code></pre>
+
+  <div class="demo">
+    <div class="ctrls">
+      <button class="btn" id="spawnBtn">go spawn ×10</button>
+      <button class="btn ghost" id="spawnReset">↺ reset</button>
+      <span class="stat">live goroutines: <b id="grtCount">0</b></span>
+    </div>
+    <div class="pool" id="pool"></div>
+    <div style="margin-top:12px" class="small">memory footprint at this count:</div>
+    <div class="small" style="color:var(--go2)">goroutines (~2KB each)</div>
+    <div class="membar"><i id="grtMem" style="width:1%;background:linear-gradient(90deg,var(--go),var(--go2))"></i></div>
+    <div class="small" style="color:var(--red)">OS threads (~1MB each) — same count</div>
+    <div class="membar"><i id="thrMem" style="width:1%;background:linear-gradient(90deg,#7a2a2a,var(--red))"></i></div>
+    <div class="small" id="memNote" style="margin-top:6px">Spawn some to compare. 1,000 goroutines ≈ 2&nbsp;MB; 1,000 OS threads ≈ 1&nbsp;GB.</div>
+  </div>
+
+  <h3>The runtime scheduler (GMP), briefly</h3>
+  <p class="small">Go multiplexes many <b>G</b>oroutines onto a few OS threads (<b>M</b>) via logical <b>P</b>rocessors (one per CPU core). When a goroutine blocks on I/O (a socket read), the scheduler parks it and runs another on the same thread — so a blocked client never wastes a thread. That's why one Fieldstone process can hold thousands of idle WebSocket connections cheaply.</p>
+  <div class="callout note"><b>The nuance:</b> <code>go f()</code> doesn't mean "run on another CPU now" — it means "hand this to the scheduler to run concurrently." Concurrency (dealing with many things) ≠ parallelism (doing many things at once); Go gives you concurrency, and uses your cores for parallelism when it helps.</div>
+</section>
+
+<!-- ===== 03 CHANNELS ===== -->
+<section id="channels">
+  <h2>Channels &amp; <code>select</code> — the realtime hub</h2>
+  <p class="lead">Goroutines don't share memory by locking it — they <b>communicate by passing messages over channels</b> (Go's motto: "share memory by communicating"). A <b>channel</b> is a typed pipe; <code>select</code> waits on several at once. Fieldstone's realtime hub is the textbook example: one goroutine owns all the state and listens on three channels.</p>
+
+  <pre><code><span class="cm">// internal/realtime/manager.go — the hub's single event loop</span>
+<span class="kw">func</span> (m *Manager) <span class="fn">Run</span>() {
+  <span class="kw">for</span> {
+    <span class="kw">select</span> {
+    <span class="kw">case</span> client := <-m.register:    m.clients[client.ID] = client          <span class="cm">// new socket</span>
+    <span class="kw">case</span> client := <-m.unregister:  <span class="kw">delete</span>(m.clients, client.ID); <span class="kw">close</span>(client.Send)
+    <span class="kw">case</span> event  := <-m.broadcast:   m.<span class="fn">broadcastToRoom</span>(event)            <span class="cm">// fan-out</span>
+    }
+  }
+}</code></pre>
+
+  <div class="demo">
+    <div class="ctrls">
+      <button class="btn" id="bcBtn">m.broadcast &lt;- event</button>
+      <label class="chk"><input type="checkbox" id="slowToggle"> 🐢 one client's buffer is full</label>
+      <button class="btn ghost" id="bcReset">↺ reset</button>
+    </div>
+    <div class="hub">
+      <div class="chans">
+        <div class="chan" id="ch-reg">register&lt;-</div>
+        <div class="chan" id="ch-unreg">unregister&lt;-</div>
+        <div class="chan" id="ch-bc">broadcast&lt;- (256)</div>
+      </div>
+      <div>
+        <div class="loopbox" id="loopbox">for { select { … } }  ·  the hub goroutine</div>
+        <div class="room" id="room"></div>
+      </div>
+    </div>
+    <div class="sim-status small" id="hubStatus" style="margin-top:10px;font-family:var(--mono)">Press broadcast — the event fans out to every client in the room.</div>
+  </div>
+
+  <h3>The pro move: never let a slow client block the hub</h3>
+  <pre><code><span class="cm">// non-blocking send — the heart of a robust hub</span>
+<span class="kw">for</span> _, client := <span class="kw">range</span> room {
+  <span class="kw">select</span> {
+  <span class="kw">case</span> client.Send <- data:        <span class="cm">// fast client: delivered</span>
+  <span class="kw">default</span>:                         <span class="cm">// buffer full (slow client): DON'T wait —</span>
+    <span class="kw">close</span>(client.Send); m.unregister <- client   <span class="cm">// drop it, protect everyone else</span>
+  }
+}</code></pre>
+  <p class="small">Tick the "🐢 buffer full" box and broadcast again: the slow client is <b>dropped</b> instead of freezing the whole hub. The buffered channels (<code>broadcast</code> 256, each client's <code>Send</code> 256) absorb bursts; the <code>default</code> case is the release valve. This one pattern is why a single hub goroutine can safely serve thousands of clients.</p>
+  <div class="callout note"><b>Buffered vs unbuffered:</b> <code>make(chan T)</code> blocks until both sides are ready (a handshake). <code>make(chan T, 256)</code> lets the sender keep going until 256 are queued. Fieldstone buffers the hot paths so a momentary spike doesn't stall senders.</div>
+</section>
+
+<!-- ===== 04 SYNC ===== -->
+<section id="sync">
+  <h2>Synchronization — RWMutex, semaphores, WaitGroup, context</h2>
+  <p class="lead">Channels coordinate <i>flow</i>; mutexes protect <i>shared state</i>; semaphores <i>bound</i> concurrency; WaitGroups <i>wait for all</i>; context <i>cancels</i>. Fieldstone uses all five. Here are the two best demos.</p>
+
+  <h3>RWMutex — many readers, one writer</h3>
+  <p class="small">The hub's <code>clients</code>/<code>rooms</code> maps are read constantly (every broadcast) and written rarely (connect/disconnect). A <code>sync.RWMutex</code> lets <b>unlimited readers in parallel</b>, but a writer gets <b>exclusive</b> access. (Fieldstone uses RWMutex in 11 places; <code>RLock</code> for reads, <code>Lock</code> for writes.)</p>
+  <div class="demo">
+    <div class="ctrls">
+      <button class="btn" id="rwRead">3 readers (RLock)</button>
+      <button class="btn" id="rwWrite">1 writer (Lock)</button>
+      <button class="btn ghost" id="rwReset">↺ reset</button>
+    </div>
+    <div class="rw" id="rwRow">
+      <span class="reader" data-r>reader A</span>
+      <span class="reader" data-r>reader B</span>
+      <span class="reader" data-r>reader C</span>
+      <span class="writer" data-w>writer ✎</span>
+    </div>
+    <div class="small" id="rwStatus" style="margin-top:10px;font-family:var(--mono)">Readers run together. A writer makes everyone else wait.</div>
+  </div>
+
+  <h3>Semaphore worker pool — bounded concurrency</h3>
+  <p class="small">The job queue runs at most N jobs at once using a <b>channel as a semaphore</b> (<code>sem chan struct{}</code> of size N). Acquire a slot before working, release on done. Extra jobs wait. This is how Fieldstone keeps background work from swamping the box.</p>
+  <pre><code><span class="cm">// internal/jobs/queue.go — semaphore + goroutine per job</span>
+<span class="kw">select</span> {
+<span class="kw">case</span> w.sem <- <span class="kw">struct</span>{}{}:        <span class="cm">// got a slot (sem has capacity N)</span>
+<span class="kw">default</span>:  <span class="kw">return</span>                  <span class="cm">// pool full → skip this tick</span>
+}
+job, _ := w.db.<span class="fn">FetchAndLockJob</span>(ctx, w.queue, w.id)   <span class="cm">// atomically claim a job</span>
+<span class="kw">go</span> <span class="kw">func</span>() { <span class="kw">defer</span> <span class="kw">func</span>(){ <-w.sem }(); w.<span class="fn">executeJob</span>(ctx, job) }()  <span class="cm">// release on done</span></code></pre>
+  <div class="demo">
+    <div class="ctrls">
+      <button class="btn" id="jobBtn">enqueue 6 jobs</button>
+      <button class="btn ghost" id="jobReset">↺ reset</button>
+      <span class="stat">slots (sem cap): <b>3</b></span>
+    </div>
+    <div class="slots" id="slots">
+      <div class="slot">slot 1</div><div class="slot">slot 2</div><div class="slot">slot 3</div>
+    </div>
+    <div class="small" style="margin-top:4px">queue (waiting):</div>
+    <div class="queue" id="jobQueue"></div>
+  </div>
+
+  <h3>WaitGroup + context — graceful shutdown</h3>
+  <pre><code><span class="cm">// wait for all workers, but give up after a timeout (context)</span>
+done := <span class="kw">make</span>(<span class="kw">chan</span> <span class="kw">struct</span>{}{})
+<span class="kw">go</span> <span class="kw">func</span>(){ q.wg.<span class="fn">Wait</span>(); <span class="kw">close</span>(done) }()   <span class="cm">// WaitGroup: all workers Done()</span>
+<span class="kw">select</span> {
+<span class="kw">case</span> <-done:        <span class="cm">// everyone finished cleanly</span>
+<span class="kw">case</span> <-ctx.<span class="fn">Done</span>(): <span class="cm">// deadline hit → stop waiting (context cancellation)</span>
+}</code></pre>
+  <p class="small"><code>context.Context</code> appears <b>285 times</b> across the codebase — it's the cancellation/deadline signal threaded through every request and job, so when a client disconnects or a timeout fires, the whole chain of goroutines below it stops instead of leaking.</p>
+</section>
+
+<!-- ===== 05 FEATURES ===== -->
+<section id="features">
+  <h2>The feature map — and the concurrency under each</h2>
+  <p class="lead">Every module is real (<code>internal/…</code>). The right column names the Go concurrency it leans on.</p>
+  <table>
+    <tr><th>Module</th><th>What it does</th><th>Concurrency used</th></tr>
+    <tr><td><b>realtime</b></td><td>WebSocket pub/sub, rooms per collection, live record events</td><td>hub goroutine + <code>select</code> over 3 channels + RWMutex + 2 goroutines/client</td></tr>
+    <tr><td><b>jobs</b></td><td>background queue, retries, locking, worker pools</td><td>semaphore-channel pool + WaitGroup + ticker + per-job goroutine</td></tr>
+    <tr><td><b>gateway</b></td><td>REST + <b>GraphQL</b> + a query builder over collections</td><td>per-request goroutine (net/http) + context</td></tr>
+    <tr><td><b>grpc</b></td><td>high-performance binary API (server + client)</td><td>goroutine-per-stream (gRPC runtime)</td></tr>
+    <tr><td><b>auth</b> + <b>webauthn</b></td><td>JWT auth, OAuth, passkeys/WebAuthn</td><td>context-scoped, RWMutex on key caches</td></tr>
+    <tr><td><b>cache</b></td><td>Redis or in-memory, TTL, invalidation</td><td>RWMutex map (in-mem) / Redis client pool</td></tr>
+    <tr><td><b>ratelimit</b></td><td>token-bucket per key</td><td>RWMutex map of buckets, lazy time-based refill</td></tr>
+    <tr><td><b>storage</b></td><td>file storage (local / S3)</td><td>streaming I/O, context cancellation</td></tr>
+    <tr><td><b>plugins</b></td><td><b>WASM</b> plugins — sandboxed custom logic (multi-language)</td><td>isolated wasm runtime per call</td></tr>
+    <tr><td><b>functions</b> · <b>webhooks</b> · <b>cron</b></td><td>edge-style functions, outbound webhooks, scheduled jobs</td><td>goroutines + the job queue + tickers</td></tr>
+    <tr><td><b>migrate</b> · <b>importexport</b> · <b>openapi</b></td><td>schema migrations, bulk data, generated API docs</td><td>sequential + batched</td></tr>
+  </table>
+  <div class="callout good"><b>The throughline:</b> a BaaS is "do many independent things at once safely." Fieldstone answers that with the smallest toolkit — a goroutine per unit of work, channels to move data between them, a mutex where state is genuinely shared, and context to cancel it all. No framework magic; just Go.</div>
+</section>
+
+<!-- ===== 06 POCKETBASE ===== -->
+<section id="pocketbase">
+  <h2>vs PocketBase — same idea, wider surface</h2>
+  <p class="lead">PocketBase is the reference Go single-binary BaaS (SQLite, auth, realtime, file storage, admin UI, JS-VM hooks). It's excellent and very mature. Fieldstone takes the same shape and widens the API + extensibility surface. Honest comparison:</p>
+  <table>
+    <tr><th>Capability</th><th>PocketBase</th><th>Fieldstone</th></tr>
+    <tr><td>Single Go binary, admin UI, auth, realtime, storage, migrations</td><td class="win">✓ mature</td><td class="win">✓</td></tr>
+    <tr><td>Primary database</td><td>SQLite only</td><td class="win">Postgres <i>or</i> SQLite</td></tr>
+    <tr><td>Query APIs</td><td>REST + filter DSL</td><td class="win">REST + <b>GraphQL</b> + <b>gRPC</b></td></tr>
+    <tr><td>Custom logic / extensibility</td><td>Go hooks or embedded JS VM</td><td class="win"><b>WASM plugins</b> (sandboxed, write in Rust/Go/etc.)</td></tr>
+    <tr><td>Background jobs</td><td>cron hooks (DIY queue)</td><td class="win">first-class <b>job queue</b> + worker pools + retries</td></tr>
+    <tr><td>Caching / rate-limiting</td><td>DIY</td><td class="win">built-in cache (Redis/in-mem) + token-bucket</td></tr>
+    <tr><td>Maturity / ecosystem / docs</td><td class="win">large, battle-tested, huge community</td><td class="wn">young, in-house</td></tr>
+    <tr><td>Horizontal scale</td><td>single-node by design (SQLite)</td><td class="win">Postgres backend enables multi-instance</td></tr>
+  </table>
+  <div class="callout note"><b>The honest read:</b> PocketBase wins on <b>maturity, community, and "it just works" polish</b> — if you want a proven SQLite BaaS today, use it. Fieldstone's edge is <b>breadth and ownership</b>: Postgres + GraphQL + gRPC + WASM plugins + a real job queue + cache/ratelimit as first-class, and it's <i>your</i> code to extend. You trade community maturity for control and a wider built-in surface.</div>
+  <div class="callout good"><b>Where Fieldstone genuinely improves:</b> (1) Postgres → multi-instance scale + your DBA tooling; (2) GraphQL/gRPC for typed, efficient clients; (3) WASM plugins → custom server logic in any language, sandboxed, safer than an embedded JS VM; (4) a proper background-job engine instead of rolling your own.</div>
+</section>
+
+<!-- ===== 07 IN-HOUSE ===== -->
+<section id="inhouse">
+  <h2>Fieldstone as an in-house backend</h2>
+  <p class="lead">Because it's one self-hostable binary with Postgres + auth + realtime + jobs + storage, Fieldstone can be the backend you <b>own and run</b> — no per-seat SaaS bill, no vendor lock-in, and (the big one for you) <b>data residency in India</b>.</p>
+
+  <div class="grid g2">
+    <div class="card"><h4 style="text-transform:none;font-family:var(--sans);color:var(--go2)">100xLongevity</h4>
+      <p class="small">Today it's on Supabase (US-managed). Fieldstone is the in-house alternative when <b>DPDP data residency</b>, cost control, or sovereignty matter:</p>
+      <ul class="small">
+        <li><b>Postgres + auth + storage</b> → the same primitives Supabase gives, on your infra.</li>
+        <li><b>Realtime hub</b> → live biomarker / score / consult-status updates to the app.</li>
+        <li><b>Job queue</b> → the score-compute + signal crons (replaces pg_cron + edge functions).</li>
+        <li><b>WASM plugins</b> → the scoring engine + OCR post-processing, sandboxed.</li>
+        <li><b>Storage</b> → lab-report / OCR file storage with signed URLs.</li>
+      </ul>
+      <p class="small"><b>Trade-off:</b> you operate it (backups, uptime) vs Supabase doing that for you. Sensible path: keep Supabase for the MVP, pilot Fieldstone for India-residency / a self-hosted tier.</p>
+    </div>
+    <div class="card"><h4 style="text-transform:none;font-family:var(--sans);color:var(--go2)">champiq-sim-pack</h4>
+      <p class="small">The relational + realtime spine under ChampIQ (Graphiti stays separate for the KG):</p>
+      <ul class="small">
+        <li><b>Postgres</b> → prospects, sequences, the structured client tier.</li>
+        <li><b>Job queue</b> → <code>champscout</code> signal fetches + <code>champbrief</code> generation on workers (the cron-cost win from the ChampIQ brief).</li>
+        <li><b>Realtime</b> → live canvas collaboration + run status.</li>
+        <li><b>WASM plugins</b> → the zerolang guardrail / enrichment, sandboxed.</li>
+        <li><b>gRPC</b> → fast internal calls between the Sim executor and the data layer.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Other fitting use-cases</h3>
+  <div class="grid g3">
+    <div class="card"><h4 style="text-transform:none;font-family:var(--sans);color:var(--go2)">Internal tools</h4><p class="small">Any Champions Group admin/dashboard needing auth + Postgres + realtime + file storage — stand one up in an afternoon instead of wiring a stack.</p></div>
+    <div class="card"><h4 style="text-transform:none;font-family:var(--sans);color:var(--go2)">Multi-tenant SaaS</h4><p class="small">Postgres backend + per-tenant collections + rate-limiting + job queue = a credible SaaS backend you fully own.</p></div>
+    <div class="card"><h4 style="text-transform:none;font-family:var(--sans);color:var(--go2)">Edge / residency deploys</h4><p class="small">One binary on a Hetzner/India box (next to the email MTA + Graphiti) gives a data-resident backend for regulated workloads.</p></div>
+  </div>
+
+  <div class="rec"><h4>★ Recommendation</h4>
+    <p style="margin:6px 0">Treat Fieldstone as your <b>in-house "Supabase you own"</b> — best where data residency, cost at scale, or deep customization (WASM plugins, GraphQL/gRPC) outweigh the convenience of managed SaaS. Keep managed services for the MVP/speed; pilot Fieldstone behind the same interface for the self-hosted / India-resident tier. Deploy it the way the CI/CD guide showed: Docker image → Railway/VPS, Postgres plugin, a Volume only if you stay on SQLite.</p>
+    <p style="margin:6px 0">Want me to build the migration map (Supabase → Fieldstone) for 100xLongevity, or a deploy recipe (Dockerfile + Railway/VPS + Postgres) specifically for Fieldstone?</p>
+  </div>
+</section>
+
+<!-- ===== 08 MOTION ===== -->
+<section id="motion">
+  <h2>More visuals — Fieldstone features, animated with <span style="color:var(--go2)">Motion.dev</span></h2>
+  <p class="lead">Three more request-path features, each resting on the same Go concurrency primitives — animated here with the <b>Motion</b> (motion.dev) JS library: <code>animate()</code> timelines, spring physics, and staggered sequences. The same tiny engine powers the diagram reveals on the Svelte portfolio.</p>
+
+  <h3>Row-Level Security — inside a transaction</h3>
+  <p class="small">The gateway opens a tx, sets the JWT claims with <code>set_config(…, true)</code> (local to the tx), then Postgres RLS filters rows by tenant before <code>COMMIT</code>. The load-bearing detail: <code>SET LOCAL</code> only applies <i>inside</i> a transaction. Watch other tenants' rows get dropped.</p>
+  <div class="demo">
+    <div class="ctrls">
+      <button class="btn" id="rlsRun">run query (Bearer JWT)</button>
+      <button class="btn ghost" id="rlsReset">↺ reset</button>
+      <span class="stat">tenant: <b>acme</b></span>
+    </div>
+    <div class="rls-track" id="rlsTrack">
+      <div class="rls-stage">request<br><span style="color:var(--mut2)">+ JWT</span></div>
+      <div class="rls-stage">BEGIN tx</div>
+      <div class="rls-stage">set_config<br><span style="color:var(--mut2)">jwt.claims</span></div>
+      <div class="rls-stage">RLS filter</div>
+      <div class="rls-stage">COMMIT</div>
+      <div class="rls-token" id="rlsToken"></div>
+    </div>
+    <div class="rls-rows" id="rlsRows"></div>
+    <div class="small" id="rlsStatus">Press run — the JWT claims are set inside the tx, then RLS drops other tenants' rows.</div>
+  </div>
+
+  <h3>WASM plugins — sandboxed transforms</h3>
+  <p class="small">Custom logic runs in a <b>wazero / WASI</b> sandbox: memory-limited, timeout-enforced, no host filesystem or network. Input flows in, transforms in-process, flows out — safer than an embedded JS VM.</p>
+  <div class="demo">
+    <div class="ctrls">
+      <button class="btn" id="wasmRun">invoke slugify.wasm</button>
+      <button class="btn ghost" id="wasmReset">↺ reset</button>
+      <span class="stat">sandbox: <b>wazero/WASI</b></span>
+    </div>
+    <div class="wasm-row">
+      <div class="wasm-io" id="wasmIn">"Acme SaaS Q3!"</div>
+      <div class="wasm-box" id="wasmBox">WASM<br><span style="color:var(--mut2)">sandboxed</span></div>
+      <div class="wasm-io" id="wasmOut">—</div>
+    </div>
+    <div class="small" id="wasmStatus">Memory-limited, timeout-enforced, no host access. Input → transform → output.</div>
+  </div>
+
+  <h3>Rate limiting — token bucket</h3>
+  <p class="small">Each request takes a token; the bucket refills over time. Empty bucket → <code>429</code>. Backed by an RWMutex-guarded map of buckets with lazy time-based refill (same pattern as the in-memory cache).</p>
+  <div class="demo">
+    <div class="ctrls">
+      <button class="btn" id="rlBurst">send 5 requests</button>
+      <button class="btn ghost" id="rlReset">↺ refill</button>
+      <span class="stat">bucket: <b id="rlCount">8</b>/8</span>
+    </div>
+    <div class="bucket" id="bucket"></div>
+    <div class="small" id="rlStatus">Token-bucket: each request takes a token; the bucket refills 1/sec. Empty → 429.</div>
+  </div>
+
+  <div class="callout note"><b>Why Motion.dev:</b> a tiny (~5KB) hybrid engine — hardware-accelerated where it can be, spring physics where you want it, and a framework-agnostic <code>animate(el, keyframes, options)</code> API that drops into vanilla JS, Svelte, or React alike. These three demos and the Svelte portfolio's architecture-diagram reveals run on the same calls.</div>
+</section>
+
+</div>
+
+<div class="foot">Fieldstone · Go concurrency visualized (goroutines · channels/select · RWMutex · semaphore pool · WaitGroup · context) · vs PocketBase · in-house BaaS · grounded in lowkeyparanoia/fieldstone · Jun 2026</div>
+
+<script>
+(function(){
+  const M = (typeof window!=='undefined' && window.Motion) ? window.Motion : null;
+  const wait = ms => new Promise(r=>setTimeout(r,ms));
+  const $ = s => document.querySelector(s);
+
+  // tabs
+  const btns=document.querySelectorAll('nav.tabs button'), secs=document.querySelectorAll('section');
+  btns.forEach(b=>b.addEventListener('click',()=>{
+    btns.forEach(x=>x.classList.remove('active'));
+    secs.forEach(s=>s.classList.remove('active'));
+    b.classList.add('active');
+    const sec=document.getElementById(b.dataset.t); sec.classList.add('active');
+    sec.querySelectorAll('.reveal').forEach((i,n)=>setTimeout(()=>i.classList.add('shown'), n*60));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }));
+  document.querySelectorAll('#overview .reveal').forEach((i,n)=>setTimeout(()=>i.classList.add('shown'), n*80));
+
+  // ---- goroutine spawner ----
+  const pool=$('#pool'), grtCount=$('#grtCount'); let g=0;
+  $('#spawnBtn').addEventListener('click',()=>{
+    for(let i=0;i<10;i++){ const d=document.createElement('div'); d.className='grt'; d.textContent='g'; pool.appendChild(d); }
+    g+=10; grtCount.textContent=g;
+    const goPct=Math.min(100, g*2/1000*100*5);            // visual scale
+    const thrPct=Math.min(100, g*1024/1000*100*5/1024*1024/1024); // threads dwarf
+    $('#grtMem').style.width=Math.max(2,Math.min(100,g/1000*100*0.2+2))+'%';
+    $('#thrMem').style.width=Math.max(2,Math.min(100,g/1000*100*100*0.2+2))+'%';
+    const goMB=(g*2/1024).toFixed(2), thrMB=(g*1).toFixed(0);
+    $('#memNote').innerHTML=`${g} goroutines ≈ <b style="color:var(--go2)">${goMB} MB</b> &nbsp;·&nbsp; ${g} OS threads ≈ <b style="color:var(--red)">${thrMB} MB</b> — same work, ~500× the memory.`;
+  });
+  $('#spawnReset').addEventListener('click',()=>{ pool.innerHTML=''; g=0; grtCount.textContent=0; $('#grtMem').style.width='1%'; $('#thrMem').style.width='1%'; $('#memNote').innerHTML='Spawn some to compare. 1,000 goroutines ≈ 2&nbsp;MB; 1,000 OS threads ≈ 1&nbsp;GB.'; });
+
+  // ---- realtime hub broadcast ----
+  const room=$('#room'); const NCL=6;
+  function buildRoom(){
+    room.innerHTML='';
+    for(let i=0;i<NCL;i++){ const c=document.createElement('div'); c.className='cl'; c.innerHTML='<span class="id">c'+i+'</span><span>Send 256</span>'; room.appendChild(c); }
+  }
+  buildRoom();
+  const hubStatus=$('#hubStatus');
+  let bcRunning=false;
+  $('#bcBtn').addEventListener('click', async ()=>{
+    if(bcRunning) return; bcRunning=true;
+    const cls=[...room.children]; cls.forEach(c=>c.classList.remove('recv','drop'));
+    const slow=$('#slowToggle').checked;
+    if(slow){ cls[3].classList.add('slow'); } else { cls[3].classList.remove('slow'); }
+    $('#ch-bc').classList.add('hot'); hubStatus.textContent='event → broadcast channel…';
+    await wait(420);
+    $('#ch-bc').classList.remove('hot'); $('#loopbox').classList.add('pulse');
+    hubStatus.innerHTML='select picked <b>case &lt;-m.broadcast</b> → broadcastToRoom()';
+    await wait(450); $('#loopbox').classList.remove('pulse');
+    for(let i=0;i<cls.length;i++){
+      await wait(180);
+      if(slow && i===3){ cls[i].classList.add('drop'); hubStatus.innerHTML='client c3 buffer full → <b style="color:var(--red)">default: drop + unregister</b> (hub keeps going)'; }
+      else { cls[i].classList.add('recv'); }
+    }
+    await wait(300);
+    hubStatus.innerHTML = slow ? '✓ delivered to fast clients; the slow one was dropped — <b>the hub never blocked</b>.' : '✓ fanned out to all clients via their buffered Send channels.';
+    bcRunning=false;
+  });
+  $('#bcReset').addEventListener('click',()=>{ buildRoom(); $('#slowToggle').checked=false; hubStatus.textContent='Press broadcast — the event fans out to every client in the room.'; });
+
+  // ---- RWMutex ----
+  const readers=[...document.querySelectorAll('#rwRow [data-r]')], writer=document.querySelector('#rwRow [data-w]'), rwStatus=$('#rwStatus');
+  function rwClear(){ readers.forEach(r=>r.classList.remove('active','blocked')); writer.classList.remove('active','blocked'); }
+  $('#rwRead').addEventListener('click', async ()=>{ rwClear(); writer.classList.add('blocked'); readers.forEach(r=>r.classList.add('active')); rwStatus.innerHTML='3 readers hold <b>RLock</b> together — parallel reads, no waiting. (a writer would block until they finish)'; });
+  $('#rwWrite').addEventListener('click', async ()=>{ rwClear(); writer.classList.add('active'); readers.forEach(r=>r.classList.add('blocked')); rwStatus.innerHTML='1 writer holds <b>Lock</b> — exclusive. All readers wait until it releases.'; });
+  $('#rwReset').addEventListener('click', ()=>{ rwClear(); rwStatus.textContent='Readers run together. A writer makes everyone else wait.'; });
+
+  // ---- worker pool semaphore ----
+  const slots=[...document.querySelectorAll('#slots .slot')], jobQ=$('#jobQueue');
+  let jobRunning=false;
+  $('#jobBtn').addEventListener('click', async ()=>{
+    if(jobRunning) return; jobRunning=true;
+    slots.forEach(s=>{s.classList.remove('busy');s.textContent='slot '+([...slots].indexOf(s)+1);});
+    jobQ.innerHTML='';
+    const jobs=[]; for(let i=1;i<=6;i++){ const j=document.createElement('div'); j.className='job'; j.textContent='job '+i; jobQ.appendChild(j); jobs.push(j); }
+    let idx=0;
+    async function tryRun(){
+      while(idx<jobs.length){
+        const free=slots.findIndex(s=>!s.classList.contains('busy'));
+        if(free<0) return;                 // sem full → wait (default: skip)
+        const job=jobs[idx++]; const slot=slots[free];
+        job.classList.add('run'); slot.classList.add('busy'); slot.textContent=job.textContent;
+        ((j,s)=> setTimeout(()=>{ j.classList.remove('run'); j.classList.add('done'); s.classList.remove('busy'); s.textContent='slot '+([...slots].indexOf(s)+1); tryRun(); }, 900+Math.random()*700) )(job,slot);
+      }
+    }
+    tryRun();
+    setTimeout(()=>{ jobRunning=false; }, 3500);
+  });
+  $('#jobReset').addEventListener('click',()=>{ slots.forEach((s,i)=>{s.classList.remove('busy');s.textContent='slot '+(i+1);}); jobQ.innerHTML=''; });
+
+  // ===== 08 · motion.dev feature demos =====
+  const animate = M ? M.animate : null;
+
+  // A. RLS in transaction
+  const rlsStages=[...document.querySelectorAll('#rlsTrack .rls-stage')], rlsToken=$('#rlsToken'), rlsRows=$('#rlsRows'), rlsStatus=$('#rlsStatus');
+  const RROWS=[{t:'acme',k:1},{t:'nimbus',k:0},{t:'acme',k:1},{t:'vela',k:0},{t:'acme',k:1},{t:'nimbus',k:0}];
+  function buildRls(){ rlsRows.innerHTML=''; RROWS.forEach((r,i)=>{ const d=document.createElement('div'); d.className='rls-rrow'; d.textContent='row#'+(i+1)+' · '+r.t; rlsRows.appendChild(d); }); }
+  buildRls();
+  let rlsBusy=false;
+  $('#rlsRun') && $('#rlsRun').addEventListener('click', async ()=>{
+    if(rlsBusy) return; rlsBusy=true; buildRls();
+    const rows=[...rlsRows.children];
+    const STAT=['request arrives with a Bearer JWT','BEGIN — open a transaction','set_config(request.jwt.claims, …, true) — local to the tx','RLS policy filters rows by tenant','COMMIT — return only permitted rows'];
+    for(let s=0;s<rlsStages.length;s++){
+      rlsStages.forEach(x=>x.classList.remove('hot')); rlsStages[s].classList.add('hot');
+      const x=rlsStages[s].offsetLeft+rlsStages[s].offsetWidth/2-7;
+      if(animate) animate(rlsToken,{left:x+'px'},{duration:.45,easing:'ease-in-out'}); else rlsToken.style.left=x+'px';
+      rlsStatus.textContent=STAT[s];
+      await wait(640);
+      if(s===3){ RROWS.forEach((r,i)=>{ if(r.k){ rows[i].classList.add('keep'); } else { rows[i].classList.add('drop'); if(animate) animate(rows[i],{opacity:[1,.12],scale:[1,.8]},{duration:.5}); } }); }
+    }
+    rlsStatus.innerHTML='✓ only <b style="color:var(--green)">tenant=acme</b> rows returned — isolation enforced by Postgres, inside the transaction.';
+    rlsBusy=false;
+  });
+  $('#rlsReset') && $('#rlsReset').addEventListener('click',()=>{ rlsStages.forEach(x=>x.classList.remove('hot')); rlsToken.style.left='0px'; buildRls(); rlsStatus.textContent='Press run — the JWT claims are set inside the tx, then RLS drops other tenants’ rows.'; });
+
+  // B. WASM sandbox
+  const wasmIn=$('#wasmIn'), wasmBox=$('#wasmBox'), wasmOut=$('#wasmOut'), wasmStatus=$('#wasmStatus');
+  let wasmBusy=false;
+  $('#wasmRun') && $('#wasmRun').addEventListener('click', async ()=>{
+    if(wasmBusy) return; wasmBusy=true; wasmOut.textContent='—';
+    if(animate){ const a=animate(wasmIn,{x:[0,70],opacity:[1,.25]},{duration:.5}); if(a&&a.finished) await a.finished; animate(wasmBox,{scale:[1,1.12,1]},{duration:.6}); }
+    wasmStatus.textContent='slugify.wasm running in the wazero sandbox…';
+    await wait(520);
+    wasmOut.textContent='"acme-saas-q3"';
+    if(animate){ animate(wasmOut,{opacity:[.2,1],x:[-26,0]},{duration:.5}); animate(wasmIn,{x:0,opacity:1},{duration:.18}); }
+    wasmStatus.innerHTML='✓ transformed in-process, sandboxed — <b>no host filesystem / network access</b>.';
+    wasmBusy=false;
+  });
+  $('#wasmReset') && $('#wasmReset').addEventListener('click',()=>{ wasmOut.textContent='—'; wasmIn.style.transform=''; wasmIn.style.opacity='1'; wasmStatus.textContent='Memory-limited, timeout-enforced, no host access. Input → transform → output.'; });
+
+  // C. token bucket
+  const bucket=$('#bucket'), rlCount=$('#rlCount'), rlStatus=$('#rlStatus'); const CAP=8; let tokens=CAP, refillT=null;
+  function drawBucket(){ bucket.innerHTML=''; for(let i=0;i<tokens;i++){ const t=document.createElement('div'); t.className='tok'; bucket.appendChild(t); } rlCount.textContent=tokens; }
+  drawBucket();
+  function startRefill(){ if(refillT) return; refillT=setInterval(()=>{ if(tokens<CAP){ tokens++; const t=document.createElement('div'); t.className='tok'; bucket.appendChild(t); if(animate) animate(t,{scale:[0,1],opacity:[0,1]},{duration:.4}); rlCount.textContent=tokens; } else { clearInterval(refillT); refillT=null; } },1000); }
+  let rlBusy=false;
+  $('#rlBurst') && $('#rlBurst').addEventListener('click', async ()=>{
+    if(rlBusy) return; rlBusy=true;
+    for(let i=0;i<5;i++){
+      if(tokens>0){ tokens--; const t=bucket.lastChild; if(t){ if(animate){ const a=animate(t,{scale:[1,0],opacity:[1,0]},{duration:.25}); if(a&&a.finished) await a.finished; } t.remove(); } rlCount.textContent=tokens; rlStatus.innerHTML='request '+(i+1)+' → <b style="color:var(--green)">200 OK</b> · token taken'; }
+      else { rlStatus.innerHTML='request '+(i+1)+' → <b style="color:var(--red)">429 Too Many Requests</b> · bucket empty'; }
+      await wait(230);
+    }
+    startRefill(); rlBusy=false;
+  });
+  $('#rlReset') && $('#rlReset').addEventListener('click',()=>{ if(refillT){clearInterval(refillT);refillT=null;} tokens=CAP; drawBucket(); rlStatus.textContent='Token-bucket: each request takes a token; the bucket refills 1/sec. Empty → 429.'; });
+})();
+</script>
+</body>
+</html>

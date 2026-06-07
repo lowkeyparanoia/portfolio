@@ -1,7 +1,10 @@
 <script>
   import { onMount }         from 'svelte';
   import { fly, fade }       from 'svelte/transition';
+  import { flip }            from 'svelte/animate';
   import { base }            from '$app/paths';
+  import ProjectCard         from '$lib/components/ProjectCard.svelte';
+  import ArchModal           from '$lib/components/ArchModal.svelte';
   import MatrixRain          from '$lib/components/MatrixRain.svelte';
   import CandlestickChart    from '$lib/components/CandlestickChart.svelte';
   import WaveformCanvas      from '$lib/components/WaveformCanvas.svelte';
@@ -110,9 +113,55 @@
     },
   ];
 
+  const projectCats = ['All', 'AI', 'Backend', 'Health', 'Quant', 'Audio'];
+  let activeCat = $state('All');
+
+  // architecture modal
+  let archOpen = $state(false);
+  let archKey  = $state(null);
+  function openArch(k) { archKey = k; archOpen = true; }
+
   const projects = [
     {
-      file: 'hospital-portal.py', wide: true,
+      file: 'champiq-sim/canvas.tsx', wide: true, category: 'AI',
+      type: '// AI · SDR Automation · Knowledge Graph', color: 'cyan',
+      title: 'ChampIQ — AI-native SDR canvas',
+      hook: 'Own the prospect data, the AI voice, and the compliance — rent the workflow engine.',
+      desc: 'A node-based outreach platform built on Sim’s durable parallel DAG runtime. Per-client knowledge graphs (ChampGraph), signal-grounded personalization, an SDR email engine (ChampMail), consent-gated AI calling (ChampVoice), and a "zerolang" checked-edit guardrail that validates every AI Copilot edit — graph-hash precondition + type checks + a consent/compliance capability gate. Re-platforming onto Sim let the team stop maintaining a workflow engine and build the defensible moat on top.',
+      why: 'Signal-based personalization lifts reply rates to ~15–25% vs 3–5% for templates (3–5×). Built as the marketing/SDR product line for ChampionsGroup; shipped as the champiq-sim-pack reference implementation.',
+      context: { label: 'Freelance · ChampionsGroup', cls: 'cyan' },
+      stack: ['Sim (Apache-2.0)','Knowledge Graph','Claude','ChampMail','ChampVoice','React/TS'],
+      metrics: [{ t: '3–5× reply lift', c: 'm-cyan' },{ t: '~245-block engine', c: 'm-cyan' },{ t: 'consent-gated AI', c: 'm-cyan' }],
+      img: '/projects/champiq.png',
+      arch: ['champiq','champsim'],
+    },
+    {
+      file: 'fieldstone/main.go', wide: true, category: 'Backend',
+      type: '// Backend · Go BaaS · Open Source', color: 'gold',
+      title: 'Fieldstone — in-house PocketBase alternative',
+      hook: 'A self-hosted Go BaaS — PocketBase × Supabase, but Postgres-first with real row-level security.',
+      desc: 'A single Go binary that is a whole backend: auto-REST + GraphQL + gRPC over real Postgres tables, JWT auth (token-key rotation + WebAuthn passkeys), a goroutine worker-pool job queue, a realtime WebSocket hub (one select-loop goroutine fanning out to thousands of clients), WASM plugins (wazero) for sandboxed custom logic, an edge-functions sidecar, cron, storage, token-bucket rate limiting, drop-in domain "packs" (healthcare/saas/marketing) shipping schema + RLS, and a React admin. Where PocketBase treats multi-tenancy as an afterthought, Fieldstone makes tenant isolation + real Postgres RLS first-class — applied per-request inside a transaction.',
+      why: 'My own open-source contribution: an in-house "Supabase you own" for data residency (India/DPDP), cost at scale, and deep customization (WASM/GraphQL/gRPC). Reusable infra under the ChampionsGroup products — not yet pushed upstream to PocketBase.',
+      context: { label: 'In-house · Open source', cls: 'gold' },
+      stack: ['Go 1.25','chi','pgx · Postgres','gRPC','wazero WASM','GraphQL','WebSocket'],
+      metrics: [{ t: 'REST + GraphQL + gRPC', c: 'm-gold' },{ t: 'Postgres RLS in-tx', c: 'm-gold' },{ t: 'WASM plugins', c: 'm-gold' }],
+      arch: ['fieldstone'],
+      viz: '/fieldstone-concurrency.html',
+      repo: 'https://github.com/lowkeyparanoia/fieldstone',
+    },
+    {
+      file: '100xlongevity/score.ts', wide: true, category: 'Health',
+      type: '// Health · Wearables · Physician AI', color: 'green',
+      title: '100xLongevity — clinical longevity platform',
+      hook: 'Turn a physical wellness facility into a measurable score — and keep members engaged between visits.',
+      desc: 'A longevity platform (Expo + Next.js + Supabase) for a physical facility: a Daily Vitality Score (0–100) z-scored against each user’s own 30-day baseline, a stack of 8 Biological Ages derived from biomarkers via auditable deterministic tables (no black-box ML — trust before automation), and a gamified Longevity Progress Score (0–1000). Ingests wearables (Fitbit/Oura/Whoop/Garmin), on-device CV pose scoring, lab-report OCR, and Zoom physician consultations where every AI suggestion is physician-approval-gated.',
+      why: 'Built for the Indian market with DPDPA-2023 data residency by design — health data and local AI never leave facility infra. I own the frontend logic layer (score gauges, age tiles, device + Zoom-consult UIs) in the Champ-Deep org.',
+      context: { label: 'Team · Champ-Deep', cls: 'green' },
+      stack: ['React Native','Expo','Next.js','Supabase','Zoom','pg_cron','Ollama (Phi-4)'],
+      metrics: [{ t: '0–1000 longevity score', c: 'm-green' },{ t: '8 biological ages', c: 'm-green' },{ t: 'DPDPA-compliant', c: 'm-green' }],
+    },
+    {
+      file: 'hospital-portal.py', wide: false, category: 'Health',
       type: '// Fullstack · PWA · AI', color: 'green',
       title: 'Hospital Patient Portal',
       desc: 'High-performance PWA modernising patient care. Sub-2s loads, real-time "Health Bubble" messaging, fault-tolerant Razorpay payment gateway, 3D UI, AI chatbot integration.',
@@ -120,7 +169,7 @@
       metrics: [{ t: '−30% admin overhead', c: 'm-green' },{ t: 'Sub-2s load time', c: 'm-green' },{ t: '100% revenue secured', c: 'm-green' }],
     },
     {
-      file: 'movie-rec.py', wide: false,
+      file: 'movie-rec.py', wide: false, category: 'AI',
       type: '// Agentic AI · MCP · Data Pipeline', color: 'cyan',
       title: 'AI Movie Recommender',
       desc: '8-platform agentic pipeline (Twitter, Spotify, YouTube, Netflix, Steam…) extracting user preferences. TMDB critic-style recommendations via Claude API + MCP-automated git workflow.',
@@ -128,7 +177,7 @@
       metrics: [{ t: '8+ platforms', c: 'm-cyan' },{ t: '10k+ profiles', c: 'm-cyan' }],
     },
     {
-      file: 'mugen.py', wide: false,
+      file: 'mugen.py', wide: false, category: 'Audio',
       type: '// Startup · HKTECH300 · HKSTP Funded', color: 'gold',
       title: 'MuGen — Music Generation',
       desc: 'Gesture-based music editing via finger tracking. Google Magenta AI generation. Azure cloud offload. Dashboard A→Z for track import, AI enhancement and prolongation.',
@@ -136,15 +185,7 @@
       metrics: [{ t: 'HKTECH300 funded', c: 'm-gold' },{ t: 'Best course project', c: 'm-gold' }],
     },
     {
-      file: 'fieldstone/main.go', wide: true,
-      type: '// Backend · Go · BaaS · ONGOING', color: 'gold',
-      title: 'Fieldstone — PocketBase Alternative',
-      desc: 'Lightweight self-hosted BaaS built in Go. REST + gRPC + WebSocket APIs, multi-tenancy (row/schema/db isolation), JWT auth with key rotation, goroutine worker-pool job queues with exponential backoff, token-bucket/sliding-window rate limiting, SQLite + PostgreSQL backends, React admin dashboard, OpenAPI generation via reflection. Ongoing — actively developed.',
-      stack: ['Go 1.23','gRPC','Chi Router','WebSocket','PostgreSQL','SQLite','Docker'],
-      metrics: [{ t: 'Ongoing', c: 'm-gold' },{ t: 'Self-hosted BaaS', c: 'm-gold' },{ t: 'gRPC + WebSocket', c: 'm-gold' }],
-    },
-    {
-      file: 'quant-monitor.py', wide: false,
+      file: 'quant-monitor.py', wide: false, category: 'Quant',
       type: '// Quant · Semi-Automated · Research', color: 'gold',
       title: 'Semi-Automated Quant Monitor',
       desc: 'Personal semi-automated trading monitor — links AI global news monitors, TradingView alerts, Discord bot signal delivery, and Google Trends retail sentiment analysis to identify where crowd sentiment is clustering. Not fully automated; human-in-the-loop execution with systematic signal aggregation.',
@@ -152,7 +193,7 @@
       metrics: [{ t: 'Semi-automated', c: 'm-gold' },{ t: 'Retail sentiment', c: 'm-gold' },{ t: 'Multi-source signals', c: 'm-gold' }],
     },
     {
-      file: 'tv-suite.pine', wide: false,
+      file: 'tv-suite.pine', wide: false, category: 'Quant',
       type: '// Quant · Pine Script · Backtesting', color: 'green',
       title: 'TradingView Strategy Suite',
       desc: 'Custom Pine Script indicators — EMA34/SMA21 cloud with Ichimoku confluence scoring (−5 to +5 regime), Fibonacci rotation entries (0.214–0.25 zone → 0.75–0.786 target, ~70% hit rate w/ candle close + relative strength confirmation). Walk-forward backtested.',
@@ -160,7 +201,7 @@
       metrics: [{ t: '2.5× profit factor', c: 'm-green' },{ t: '~70% Fib hit rate', c: 'm-green' },{ t: 'Walk-forward validated', c: 'm-green' }],
     },
     {
-      file: 'ai-tutor.py', wide: false,
+      file: 'ai-tutor.py', wide: false, category: 'AI',
       type: '// EdTech · LLM · Adaptive', color: 'cyan',
       title: 'AI DSA & SQL Tutor',
       desc: 'Intelligent tutoring for Python DSA and SQL. Adaptive question gen, step-by-step explanations, personalised difficulty scaling.',
@@ -168,6 +209,10 @@
       metrics: [{ t: 'Adaptive difficulty', c: 'm-cyan' },{ t: 'SQL mastery', c: 'm-cyan' }],
     },
   ];
+
+  const filteredProjects = $derived(
+    activeCat === 'All' ? projects : projects.filter((p) => p.category === activeCat)
+  );
 
   const tradingStats = [
     { val: '2.5×',  label: 'Profit Factor',    sub: 'TradingView strategies',   cls: 'sv-green' },
@@ -335,28 +380,35 @@
   <div class="container">
     <p class="sec-label">projects</p>
     <h2 class="sec-title">Things I've <span>built</span></h2>
-    <p class="sec-sub">AI systems, fullstack apps, quant tools, music tech.</p>
+    <p class="sec-sub">AI systems, fullstack apps, quant tools, music tech — and the engineering I do for <span style="color:var(--cyan)">ChampionsGroup</span>.</p>
+
+    <!-- ChampionsGroup context band -->
+    <div class="cg-band reveal">
+      <span class="cg-k">// building under ChampionsGroup (Champ-Deep):</span>
+      <span class="cg-row"><b style="color:var(--cyan)">ChampIQ</b> — freelance SDR/marketing automation deliverable.</span>
+      <span class="cg-row"><b style="color:var(--gold)">Fieldstone</b> — my in-house, open-source PocketBase alternative the products can run on.</span>
+      <span class="cg-row"><b style="color:var(--green)">100xLongevity</b> — a clinical longevity product I build the frontend layer for.</span>
+    </div>
+
+    <!-- filter chips -->
+    <div class="proj-filter reveal" role="tablist" aria-label="Filter projects">
+      {#each projectCats as c}
+        <button class="chip" class:on={activeCat === c} role="tab" aria-selected={activeCat === c}
+          onclick={() => (activeCat = c)}>{c}</button>
+      {/each}
+    </div>
+
     <div class="proj-bento">
-      {#each projects as p}
-        <div class="term proj-card reveal" class:wide={p.wide} data-color={p.color}>
-          <div class="term-bar">
-            <span class="term-btn r"></span><span class="term-btn y"></span><span class="term-btn g"></span>
-            <span class="term-title">{p.file}</span>
-          </div>
-          <div class="term-body">
-            <p class="proj-type">{p.type}</p>
-            <h3 class="proj-title">{p.title}</h3>
-            <p class="proj-desc">{p.desc}</p>
-            <div class="proj-stack">{#each p.stack as s}<span class="tag">{s}</span>{/each}</div>
-            <div class="proj-metrics">
-              {#each p.metrics as m}<span class="metric {m.c}">✓ {m.t}</span>{/each}
-            </div>
-          </div>
+      {#each filteredProjects as p (p.title)}
+        <div class="proj-cell" class:wide={p.wide} animate:flip={{ duration: 320 }}>
+          <ProjectCard {p} onViewArch={openArch} />
         </div>
       {/each}
     </div>
   </div>
 </section>
+
+<ArchModal bind:open={archOpen} diagramKey={archKey} />
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- TRADING                                                     -->
@@ -789,22 +841,31 @@
 .oss-stack { display: flex; flex-wrap: wrap; gap: 6px; }
 
 /* ── PROJECTS ──────────────────────────────────────────────── */
+.cg-band {
+  display: flex; flex-direction: column; gap: 4px;
+  border-left: 2px solid var(--green-dim); background: var(--bg2);
+  padding: 12px 16px; margin: 18px 0; border-radius: 0 var(--radius) var(--radius) 0;
+}
+.cg-k   { font-family: var(--font); font-size: 0.7rem; color: var(--text-mute); letter-spacing: 0.04em; margin-bottom: 2px; }
+.cg-row { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
+.proj-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.chip {
+  font-family: var(--font); font-size: 0.74rem; letter-spacing: 0.03em;
+  padding: 6px 14px; border-radius: 999px; cursor: pointer; transition: 0.18s;
+  background: var(--surface); border: 1px solid var(--border2); color: var(--text-dim);
+}
+.chip:hover { border-color: var(--green-dim); color: var(--green); }
+.chip.on { background: var(--green); border-color: var(--green); color: #000; font-weight: 700; }
 .proj-bento {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+  align-items: stretch;
 }
-.proj-card { transition: 0.25s; }
-.proj-card.wide { grid-column: span 2; }
-.proj-card:hover { box-shadow: 0 0 24px rgba(0,255,65,0.08); }
-.proj-card[data-color="cyan"]:hover  { border-color: var(--cyan-d); }
-.proj-card[data-color="gold"]:hover  { border-color: var(--gold-d); }
-.proj-card[data-color="green"]:hover { border-color: var(--green-dim); }
-.proj-type    { font-size: 0.7rem; color: var(--text-mute); margin-bottom: 8px; }
-.proj-title   { font-family: var(--sans); font-size: 1rem; font-weight: 700; color: var(--green); margin-bottom: 10px; }
-.proj-desc    { font-size: 0.82rem; color: var(--text-dim); line-height: 1.65; margin-bottom: 14px; }
-.proj-stack   { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
-.proj-metrics { display: flex; flex-direction: column; gap: 3px; }
+.proj-cell { display: flex; min-width: 0; }
+.proj-cell.wide { grid-column: span 2; }
+.proj-type  { font-size: 0.7rem; color: var(--text-mute); margin-bottom: 8px; }
+.proj-stack { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
 
 /* ── TRADING ───────────────────────────────────────────────── */
 .trading-wrap {
@@ -944,7 +1005,7 @@
   .music-grid   { grid-template-columns: 1fr; }
   .contact-grid { grid-template-columns: 1fr; }
   .proj-bento   { grid-template-columns: 1fr; }
-  .proj-card.wide { grid-column: span 1; }
+  .proj-cell.wide { grid-column: span 1; }
   .av-feature-body { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
