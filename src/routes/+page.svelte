@@ -115,7 +115,6 @@
   const tradingStats = [
     { val: '2.5×',  label: 'Profit Factor',    sub: 'TradingView strategies',   cls: 'sv-green' },
     { val: '~70%',  label: 'Fib Hit Rate',      sub: 'Close + RS confirmation',  cls: 'sv-green' },
-    { val: '10×',   label: 'Market Returns',    sub: 'Indian market 2022–24',    cls: 'sv-gold'  },
     { val: '+13%',  label: 'Hyrotrader',        sub: 'Crypto futures / 1 month', cls: 'sv-cyan'  },
     { val: '#140',  label: 'Bloomberg Rank',    sub: 'Global equity competition',cls: 'sv-gold'  },
     { val: '3%',    label: 'Max Risk / Trade',  sub: 'Strict risk management',   cls: 'sv-green' },
