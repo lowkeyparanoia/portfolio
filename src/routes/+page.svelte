@@ -2,11 +2,14 @@
   import { onMount }         from 'svelte';
   import { fly, fade }       from 'svelte/transition';
   import { base }            from '$app/paths';
+  import FeaturedWork        from '$lib/components/FeaturedWork.svelte';
+  import ProjectVizModal     from '$lib/components/ProjectVizModal.svelte';
+  import ArCard              from '$lib/components/ArCard.svelte';
+  import SectionBg           from '$lib/components/SectionBg.svelte';
   import MatrixRain          from '$lib/components/MatrixRain.svelte';
   import CandlestickChart    from '$lib/components/CandlestickChart.svelte';
   import WaveformCanvas      from '$lib/components/WaveformCanvas.svelte';
   import SpectroCanvas       from '$lib/components/SpectroCanvas.svelte';
-  import CircuitBoard        from '$lib/components/CircuitBoard.svelte';
   import EcgLine             from '$lib/components/EcgLine.svelte';
 
   // ── Boot ─────────────────────────────────────────────────────
@@ -55,6 +58,18 @@
   // ── Data ─────────────────────────────────────────────────────
   const experience = [
     {
+      file: 'contrapunk-audio/contrapunk',
+      company: 'Contrapunk', role: 'real-time counterpoint engine',
+      period: '2025 – present', loc: 'Rust · Tauri · WASM',
+      badge: 'OPEN SOURCE',
+      stack: ['Rust','Tauri','WebAssembly','OSC','TouchDesigner'],
+      bullets: [
+        'Plug in a guitar → live Bach / Jazz / Palestrina counterpoint, sub-10ms pluck→MIDI',
+        'Single-cycle pitch detection, 128-sample buffers, 8 harmony modes, 28 scales; native via Tauri, browser via WASM',
+        'OSC bridge broadcasting audio events to TouchDesigner for music-reactive live visuals',
+      ],
+    },
+    {
       file: 'banza.sh',
       company: 'Banza', role: 'Backend Developer',
       period: 'Jun–Oct 2025', loc: 'Dubai (Remote)',
@@ -89,90 +104,17 @@
     },
   ];
 
-  const oss = [
-    {
-      file: 'contrapunk-audio/contrapunk',
-      title: 'Contrapunk',
-      type: 'AUDIO TECH · RUST · TAURI · WASM',
-      desc: `Real-time counterpoint harmony desktop app — plug in a guitar and hear Bach/Jazz/Palestrina counterpoint generated live. Single-cycle pitch detection, 128-sample buffers, 8 harmony modes, 28 scale modes. Native via Tauri, browser via WebAssembly. Extended with contrapunk_osc_sender.rs — OSC bridge broadcasting audio events to TouchDesigner for music-reactive visuals. Built a TD docs MCP server (556 ops indexed) to accelerate the visual integration.`,
-      stack: ['Rust','Tauri','WebAssembly','OSC','TouchDesigner','Real-time Audio'],
-      accentColor: 'var(--cyan)',
-      tagClass: 'cyan',
-    },
-    {
-      file: 'Rigor-Cloud/rigor → rigorcloud.com',
-      title: 'Rigorcloud',
-      type: 'LLM SAFETY · RUST · OPA/REGO · AI',
-      desc: 'MITM proxy that fact-checks LLM responses mid-stream against Rego policy constraints — kills violating streams and auto-retries with correction feedback. Works with Claude Code, OpenCode. Regorus (pure-Rust OPA engine) for local policy eval. Zero telemetry, Apache 2.0.',
-      stack: ['Rust','OPA/Rego','LLM Safety','MITM Proxy','Claude API'],
-      accentColor: 'var(--gold)',
-      tagClass: 'gold',
-    },
-  ];
 
-  const projects = [
-    {
-      file: 'hospital-portal.py', wide: true,
-      type: '// Fullstack · PWA · AI', color: 'green',
-      title: 'Hospital Patient Portal',
-      desc: 'High-performance PWA modernising patient care. Sub-2s loads, real-time "Health Bubble" messaging, fault-tolerant Razorpay payment gateway, 3D UI, AI chatbot integration.',
-      stack: ['React 19','FastAPI','PostgreSQL','Razorpay','WebSocket'],
-      metrics: [{ t: '−30% admin overhead', c: 'm-green' },{ t: 'Sub-2s load time', c: 'm-green' },{ t: '100% revenue secured', c: 'm-green' }],
-    },
-    {
-      file: 'movie-rec.py', wide: false,
-      type: '// Agentic AI · MCP · Data Pipeline', color: 'cyan',
-      title: 'AI Movie Recommender',
-      desc: '8-platform agentic pipeline (Twitter, Spotify, YouTube, Netflix, Steam…) extracting user preferences. TMDB critic-style recommendations via Claude API + MCP-automated git workflow.',
-      stack: ['FastAPI','Pydantic AI','Claude API','MongoDB'],
-      metrics: [{ t: '8+ platforms', c: 'm-cyan' },{ t: '10k+ profiles', c: 'm-cyan' }],
-    },
-    {
-      file: 'mugen.py', wide: false,
-      type: '// Startup · HKTECH300 · HKSTP Funded', color: 'gold',
-      title: 'MuGen — Music Generation',
-      desc: 'Gesture-based music editing via finger tracking. Google Magenta AI generation. Azure cloud offload. Dashboard A→Z for track import, AI enhancement and prolongation.',
-      stack: ['Azure','Magenta','Docker','Figma'],
-      metrics: [{ t: 'HKTECH300 funded', c: 'm-gold' },{ t: 'Best course project', c: 'm-gold' }],
-    },
-    {
-      file: 'fieldstone/main.go', wide: true,
-      type: '// Backend · Go · BaaS · ONGOING', color: 'gold',
-      title: 'Fieldstone — PocketBase Alternative',
-      desc: 'Lightweight self-hosted BaaS built in Go. REST + gRPC + WebSocket APIs, multi-tenancy (row/schema/db isolation), JWT auth with key rotation, goroutine worker-pool job queues with exponential backoff, token-bucket/sliding-window rate limiting, SQLite + PostgreSQL backends, React admin dashboard, OpenAPI generation via reflection. Ongoing — actively developed.',
-      stack: ['Go 1.23','gRPC','Chi Router','WebSocket','PostgreSQL','SQLite','Docker'],
-      metrics: [{ t: 'Ongoing', c: 'm-gold' },{ t: 'Self-hosted BaaS', c: 'm-gold' },{ t: 'gRPC + WebSocket', c: 'm-gold' }],
-    },
-    {
-      file: 'quant-monitor.py', wide: false,
-      type: '// Quant · Semi-Automated · Research', color: 'gold',
-      title: 'Semi-Automated Quant Monitor',
-      desc: 'Personal semi-automated trading monitor — links AI global news monitors, TradingView alerts, Discord bot signal delivery, and Google Trends retail sentiment analysis to identify where crowd sentiment is clustering. Not fully automated; human-in-the-loop execution with systematic signal aggregation.',
-      stack: ['TradingView','Pine Script','Discord Bot','Google Trends','Python'],
-      metrics: [{ t: 'Semi-automated', c: 'm-gold' },{ t: 'Retail sentiment', c: 'm-gold' },{ t: 'Multi-source signals', c: 'm-gold' }],
-    },
-    {
-      file: 'tv-suite.pine', wide: false,
-      type: '// Quant · Pine Script · Backtesting', color: 'green',
-      title: 'TradingView Strategy Suite',
-      desc: 'Custom Pine Script indicators — EMA34/SMA21 cloud with Ichimoku confluence scoring (−5 to +5 regime), Fibonacci rotation entries (0.214–0.25 zone → 0.75–0.786 target, ~70% hit rate w/ candle close + relative strength confirmation). Walk-forward backtested.',
-      stack: ['Pine Script','Ichimoku','Fibonacci','EMA/SMA Cloud','Backtesting'],
-      metrics: [{ t: '2.5× profit factor', c: 'm-green' },{ t: '~70% Fib hit rate', c: 'm-green' },{ t: 'Walk-forward validated', c: 'm-green' }],
-    },
-    {
-      file: 'ai-tutor.py', wide: false,
-      type: '// EdTech · LLM · Adaptive', color: 'cyan',
-      title: 'AI DSA & SQL Tutor',
-      desc: 'Intelligent tutoring for Python DSA and SQL. Adaptive question gen, step-by-step explanations, personalised difficulty scaling.',
-      stack: ['FastAPI','LLM','Adaptive AI'],
-      metrics: [{ t: 'Adaptive difficulty', c: 'm-cyan' },{ t: 'SQL mastery', c: 'm-cyan' }],
-    },
-  ];
+
+  let vizOpen = $state(false);
+  let vizProject = $state(null);
+  function openViz(p) { vizProject = p; vizOpen = true; }
+
+
 
   const tradingStats = [
     { val: '2.5×',  label: 'Profit Factor',    sub: 'TradingView strategies',   cls: 'sv-green' },
     { val: '~70%',  label: 'Fib Hit Rate',      sub: 'Close + RS confirmation',  cls: 'sv-green' },
-    { val: '10×',   label: 'Market Returns',    sub: 'Indian market 2022–24',    cls: 'sv-gold'  },
     { val: '+13%',  label: 'Hyrotrader',        sub: 'Crypto futures / 1 month', cls: 'sv-cyan'  },
     { val: '#140',  label: 'Bloomberg Rank',    sub: 'Global equity competition',cls: 'sv-gold'  },
     { val: '3%',    label: 'Max Risk / Trade',  sub: 'Strict risk management',   cls: 'sv-green' },
@@ -188,14 +130,6 @@
     { idx: '07', text: 'IELTS Score 8.5 — English Proficiency',                     sub: 'Languages: English · Kannada · Konkani · Hindi',            col: 'gold'  },
   ];
 
-  const skills = [
-    { file: 'backend/',       cat: 'backend',          items: ['Python','FastAPI','Java','Spring','Node.js','REST','WebSockets']                   },
-    { file: 'ai_ml/',         cat: 'AI / ML',          items: ['PyTorch','Transformers','LLM Fine-tuning','Pydantic AI','Claude API','Magenta']    },
-    { file: 'databases/',     cat: 'databases',        items: ['PostgreSQL','MongoDB','Redis','TimescaleDB','Qdrant','MySQL']                      },
-    { file: 'cloud_ops/',     cat: 'cloud / ops',      items: ['Azure','Docker','Kafka','Celery','GitHub Actions','Git']                           },
-    { file: 'audio_systems/', cat: 'audio / music tech',items: ['Rust','Tauri','WASM','TidalCycles','SuperCollider','OSC','TouchDesigner']          },
-    { file: 'finance/',       cat: 'quant / finance',  items: ['Bloomberg Terminal','Pine Script','Ichimoku','Fibonacci','Options GEX','Backtesting']},
-  ];
 </script>
 
 <!-- ══════════════════════════════════════════════════════════ -->
@@ -251,13 +185,27 @@
 </section>
 
 <!-- ══════════════════════════════════════════════════════════ -->
+<!-- FEATURED WORK (visual hook — above the text)                -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="featured" class="section">
+  <SectionBg variant="synth" intensity={0.72} />
+  <div class="container">
+    <p class="sec-label">featured_work</p>
+    <h2 class="sec-title">Selected <span>builds</span> — explore the architecture</h2>
+    <p class="sec-sub">Four flagship systems, each with a live visual and an interactive diagram. Click into the architecture before reading a word.</p>
+    <FeaturedWork onOpenViz={openViz} />
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
 <!-- EXPERIENCE                                                  -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="experience" class="section alt">
+  <SectionBg variant="solid" />
   <div class="container">
     <p class="sec-label">work_experience</p>
     <h2 class="sec-title">Where I've <span>shipped</span></h2>
-    <p class="sec-sub">Backend, ML, cloud architecture across Hong Kong and Dubai.</p>
+    <p class="sec-sub">Backend, ML and cloud across Hong Kong &amp; Dubai — and the open-source systems I build.</p>
     <div class="exp-grid">
       {#each experience as exp}
         <div class="exp-item reveal">
@@ -272,6 +220,7 @@
                 <div>
                   <span class="exp-company">{exp.company}</span>
                   <span class="exp-role"> // {exp.role}</span>
+                  {#if exp.badge}<span class="exp-badge">◆ {exp.badge}</span>{/if}
                 </div>
                 <div class="exp-meta">
                   <span class="tag">{exp.period}</span>
@@ -297,71 +246,17 @@
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- OPEN SOURCE                                                 -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<section id="opensource" class="section">
-  <div class="container">
-    <p class="sec-label">open_source</p>
-    <h2 class="sec-title">Open Source <span>Contributions</span></h2>
-    <p class="sec-sub">Production contributions to real-world Rust tooling and audio tech.</p>
-    <div class="oss-grid reveal">
-      {#each oss as o}
-        <div class="term oss-card">
-          <div class="term-bar">
-            <span class="term-btn r"></span><span class="term-btn y"></span><span class="term-btn g"></span>
-            <span class="term-title">{o.file}</span>
-          </div>
-          <div class="oss-inner" style="--accent:{o.accentColor}">
-            <div class="oss-accent-bar"></div>
-            <div class="oss-body">
-              <div class="oss-title">{o.title}</div>
-              <div class="oss-type">{o.type}</div>
-              <div class="oss-desc">{o.desc}</div>
-              <div class="oss-stack">
-                {#each o.stack as s}
-                  <span class="tag {o.tagClass}">{s}</span>
-                {/each}
-              </div>
-            </div>
-          </div>
-        </div>
-      {/each}
-    </div>
-  </div>
-</section>
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- PROJECTS                                                    -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<section id="projects" class="section alt">
-  <div class="container">
-    <p class="sec-label">projects</p>
-    <h2 class="sec-title">Things I've <span>built</span></h2>
-    <p class="sec-sub">AI systems, fullstack apps, quant tools, music tech.</p>
-    <div class="proj-bento">
-      {#each projects as p}
-        <div class="term proj-card reveal" class:wide={p.wide} data-color={p.color}>
-          <div class="term-bar">
-            <span class="term-btn r"></span><span class="term-btn y"></span><span class="term-btn g"></span>
-            <span class="term-title">{p.file}</span>
-          </div>
-          <div class="term-body">
-            <p class="proj-type">{p.type}</p>
-            <h3 class="proj-title">{p.title}</h3>
-            <p class="proj-desc">{p.desc}</p>
-            <div class="proj-stack">{#each p.stack as s}<span class="tag">{s}</span>{/each}</div>
-            <div class="proj-metrics">
-              {#each p.metrics as m}<span class="metric {m.c}">✓ {m.t}</span>{/each}
-            </div>
-          </div>
-        </div>
-      {/each}
-    </div>
-  </div>
-</section>
+<ProjectVizModal bind:open={vizOpen} project={vizProject} />
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- TRADING                                                     -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="trading" class="section">
+  <SectionBg variant="glow" />
   <div class="container">
     <p class="sec-label">trading_and_finance</p>
     <h2 class="sec-title">Quantitative <span>Edge</span></h2>
@@ -411,6 +306,7 @@
 <!-- HEALTHCARE                                                  -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="healthcare" class="section alt">
+  <SectionBg variant="synth" intensity={0.65} />
   <div class="container">
     <p class="sec-label">healthcare_ai</p>
     <h2 class="sec-title">Healthcare <span>Intelligence</span></h2>
@@ -452,6 +348,7 @@
 <!-- MUSIC                                                       -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="music" class="section">
+  <SectionBg variant="solid" />
   <div class="container">
     <p class="sec-label">music_tech</p>
     <h2 class="sec-title">Music <span>Technology</span></h2>
@@ -497,6 +394,7 @@
 <!-- AV WORK / PROJECTION MAPPING                               -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="av-work" class="section alt">
+  <SectionBg variant="glow" />
   <div class="container">
     <p class="sec-label">// Visual Arts · AV · Projection Mapping</p>
     <h2 class="sec-title">Projection Mapping &amp; <span>Visual Performance</span></h2>
@@ -584,6 +482,7 @@
 <!-- ACHIEVEMENTS                                               -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="about" class="section">
+  <SectionBg variant="solid" />
   <div class="container">
     <p class="sec-label">achievements</p>
     <h2 class="sec-title">Track <span>Record</span></h2>
@@ -606,26 +505,17 @@
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- SKILLS                                                     -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<section id="skills" class="section skills-section">
-  <CircuitBoard opacity={0.22} />
-  <div class="container" style="position:relative;z-index:1">
-    <p class="sec-label">tech_stack</p>
-    <h2 class="sec-title">ls -la <span>skills/</span></h2>
-    <div class="skills-grid">
-      {#each skills as s}
-        <div class="term reveal">
-          <div class="term-bar">
-            <span class="term-btn r"></span><span class="term-btn y"></span><span class="term-btn g"></span>
-            <span class="term-title">{s.file}</span>
-          </div>
-          <div class="term-body">
-            <div class="sk-cat">{s.cat}</div>
-            <div class="sk-items">
-              {#each s.items as item}<span class="sk-item">{item}</span>{/each}
-            </div>
-          </div>
-        </div>
-      {/each}
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- DIGITAL / AR CARD                                          -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="card" class="section">
+  <SectionBg variant="synth" intensity={1} />
+  <div class="container">
+    <p class="sec-label">digital_card</p>
+    <h2 class="sec-title">My card, in <span>3D</span> &amp; <span>AR</span></h2>
+    <p class="sec-sub">A paper-free business card — tilt it with your cursor or finger, flip it for links and stack, then drop it into real space in AR.</p>
+    <div class="card-wrap reveal">
+      <ArCard />
     </div>
   </div>
 </section>
@@ -634,6 +524,7 @@
 <!-- CONTACT                                                    -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="contact" class="section alt">
+  <SectionBg variant="glow" />
   <div class="container">
     <div class="contact-grid reveal">
       <div class="term contact-term">
@@ -656,7 +547,7 @@
             <a href="https://rigorcloud.com" target="_blank" rel="noopener" class="contact-link"><span class="cl-icon">⌬</span> rigorcloud.com</a>
           </div>
           <p class="prompt" style="margin-top:16px;margin-bottom:4px">echo $LOCATION</p>
-          <p class="contact-line">Bengaluru, India · +91 9148703028</p>
+          <p class="contact-line">Bengaluru, India</p>
         </div>
       </div>
       <div class="term profile-card">
@@ -667,7 +558,7 @@
         <div class="term-body">
           <p class="prompt" style="margin-bottom:12px">cat about.txt</p>
           <p class="profile-name">Jrenoth Misquith</p>
-          <p class="profile-detail">BSc Computer Science · Data Science<br>City University of Hong Kong</p>
+          <p class="profile-detail">BSc Computer Science</p>
           <p class="profile-detail" style="margin-top:8px">
             Languages: English (IELTS 8.5) · Kannada · Konkani · Hindi
           </p>
@@ -767,6 +658,12 @@
 }
 .exp-company { color: var(--green); font-weight: 700; font-size: 1rem; }
 .exp-role    { color: var(--text-mute); font-size: 0.88rem; }
+.exp-badge   {
+  display: inline-block; margin-left: 8px; font-family: var(--font);
+  font-size: 0.6rem; letter-spacing: 0.08em; color: var(--cyan);
+  border: 1px solid var(--cyan-d); border-radius: 3px; padding: 1px 7px;
+  vertical-align: middle; white-space: nowrap;
+}
 .exp-meta    { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .exp-loc     { font-size: 0.72rem; color: var(--text-mute); }
 .exp-stack   { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
@@ -789,22 +686,31 @@
 .oss-stack { display: flex; flex-wrap: wrap; gap: 6px; }
 
 /* ── PROJECTS ──────────────────────────────────────────────── */
+.cg-band {
+  display: flex; flex-direction: column; gap: 4px;
+  border-left: 2px solid var(--green-dim); background: var(--bg2);
+  padding: 12px 16px; margin: 18px 0; border-radius: 0 var(--radius) var(--radius) 0;
+}
+.cg-k   { font-family: var(--font); font-size: 0.7rem; color: var(--text-mute); letter-spacing: 0.04em; margin-bottom: 2px; }
+.cg-row { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
+.proj-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.chip {
+  font-family: var(--font); font-size: 0.74rem; letter-spacing: 0.03em;
+  padding: 6px 14px; border-radius: 999px; cursor: pointer; transition: 0.18s;
+  background: var(--surface); border: 1px solid var(--border2); color: var(--text-dim);
+}
+.chip:hover { border-color: var(--green-dim); color: var(--green); }
+.chip.on { background: var(--green); border-color: var(--green); color: #000; font-weight: 700; }
 .proj-bento {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+  align-items: stretch;
 }
-.proj-card { transition: 0.25s; }
-.proj-card.wide { grid-column: span 2; }
-.proj-card:hover { box-shadow: 0 0 24px rgba(0,255,65,0.08); }
-.proj-card[data-color="cyan"]:hover  { border-color: var(--cyan-d); }
-.proj-card[data-color="gold"]:hover  { border-color: var(--gold-d); }
-.proj-card[data-color="green"]:hover { border-color: var(--green-dim); }
-.proj-type    { font-size: 0.7rem; color: var(--text-mute); margin-bottom: 8px; }
-.proj-title   { font-family: var(--sans); font-size: 1rem; font-weight: 700; color: var(--green); margin-bottom: 10px; }
-.proj-desc    { font-size: 0.82rem; color: var(--text-dim); line-height: 1.65; margin-bottom: 14px; }
-.proj-stack   { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
-.proj-metrics { display: flex; flex-direction: column; gap: 3px; }
+.proj-cell { display: flex; min-width: 0; }
+.proj-cell.wide { grid-column: span 2; }
+.proj-type  { font-size: 0.7rem; color: var(--text-mute); margin-bottom: 8px; }
+.proj-stack { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
 
 /* ── TRADING ───────────────────────────────────────────────── */
 .trading-wrap {
@@ -881,9 +787,7 @@
 .ach-main  { display: block; font-size: 0.88rem; color: var(--text); font-weight: 500; }
 .ach-sub   { display: block; font-size: 0.75rem; color: var(--text-mute); margin-top: 2px; }
 
-/* ── SKILLS ────────────────────────────────────────────────── */
-.skills-section { position: relative; overflow: hidden; }
-.skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+/* ── SKILL TAGS (used in the AV section) ───────────────────── */
 .sk-cat   { font-size: 0.7rem; color: var(--text-mute); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
 .sk-items { display: flex; flex-wrap: wrap; gap: 6px; }
 .sk-item  {
@@ -892,6 +796,9 @@
   font-size: 0.78rem; transition: border-color 0.2s, color 0.2s;
 }
 .sk-item:hover { border-color: var(--green); color: var(--green); }
+
+/* ── DIGITAL / AR CARD ─────────────────────────────────────── */
+.card-wrap { display: flex; justify-content: center; padding: 16px 0 4px; }
 
 /* ── CONTACT ───────────────────────────────────────────────── */
 .contact-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
@@ -939,12 +846,9 @@
 @media (max-width: 900px) {
   .hero { padding-top: 56px; }
   .trading-wrap { grid-template-columns: 1fr; }
-  .oss-grid     { grid-template-columns: 1fr; }
   .health-grid  { grid-template-columns: 1fr; }
   .music-grid   { grid-template-columns: 1fr; }
   .contact-grid { grid-template-columns: 1fr; }
-  .proj-bento   { grid-template-columns: 1fr; }
-  .proj-card.wide { grid-column: span 1; }
   .av-feature-body { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {

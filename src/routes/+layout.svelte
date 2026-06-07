@@ -2,12 +2,14 @@
   import '../app.css';
   import Nav    from '$lib/components/Nav.svelte';
   import Ticker from '$lib/components/Ticker.svelte';
+  import FunFacts from '$lib/components/FunFacts.svelte';
   let { children } = $props();
 </script>
 
 <Ticker />
 <Nav />
 {@render children()}
+<FunFacts />
 
 <footer>
   <div class="container">

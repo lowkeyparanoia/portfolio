@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#020408"/>
+<title>AR Card — JRENOTH MISQUITH</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<style>
+:root {
+  --green:#00ff41; --cyan:#00e5ff; --gold:#ffd700; --purple:#9a6cf0;
+  --bg:#020408; --surf:#0a1922; --bdr2:#1a3d5c;
+  --text:#b8d4c8; --dim:#6a9080; --mute:#2d5040;
+  --font:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:var(--font);overflow:hidden;width:100vw;height:100vh;}
+body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);}
+canvas#c{display:block;width:100vw;height:100vh;}
+
+/* ── Start screen ── */
+#start{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:18px;background:var(--bg);padding:24px;}
+.s-logo{font-size:10px;color:var(--green);letter-spacing:3px;text-shadow:0 0 20px rgba(0,255,65,.4);}
+.s-name{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.s-sub{font-size:11px;color:var(--dim);text-align:center;max-width:280px;line-height:1.7;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.btn{padding:12px 28px;border-radius:4px;font-family:var(--font);font-size:12px;letter-spacing:.5px;cursor:pointer;transition:.15s;}
+.btn-ar{background:#003d10;border:1px solid var(--green);color:var(--green);}
+.btn-ar:hover{background:rgba(0,255,65,.1);}
+.btn-3d{background:#0a1520;border:1px solid var(--cyan);color:var(--cyan);}
+.btn-3d:hover{background:rgba(0,229,255,.08);}
+.s-note{font-size:9px;color:var(--mute);text-align:center;max-width:300px;line-height:1.8;}
+.back-a{font-size:9px;color:var(--mute);text-decoration:none;margin-top:4px;}
+
+/* ── HUD ── */
+#hud{display:none;position:fixed;inset:0;z-index:50;pointer-events:none;
+  flex-direction:column;justify-content:space-between;padding:20px;}
+#hud.on{display:flex;}
+.hud-top{display:flex;justify-content:space-between;align-items:center;}
+.hud-id{font-size:10px;color:var(--green);letter-spacing:2px;text-shadow:0 0 8px var(--green);}
+.hud-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:p 1.5s ease-in-out infinite;}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.2}}
+.hud-bottom{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.hint{font-size:11px;color:var(--text);background:rgba(2,4,8,.82);
+  border:1px solid rgba(0,255,65,.2);padding:8px 20px;letter-spacing:.3px;
+  text-align:center;backdrop-filter:blur(8px);}
+.hint b{color:var(--green);font-weight:500;}
+.hud-btns{display:flex;gap:8px;pointer-events:all;}
+.hud-btn{padding:9px 18px;background:rgba(2,4,8,.8);border:1px solid rgba(0,255,65,.3);
+  color:var(--green);font-family:var(--font);font-size:10px;letter-spacing:.5px;
+  text-decoration:none;cursor:pointer;backdrop-filter:blur(6px);}
+
+/* reticle-lbl removed — no surface scanning */
+
+/* ── Fallback ── */
+#fallback{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;
+  flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:32px;text-align:center;}
+.fb-err{font-size:12px;color:#ff4455;}
+.fb-msg{font-size:11px;color:var(--dim);line-height:1.8;}
+.fb-link{padding:10px 24px;background:#003d10;border:1px solid var(--green);
+  color:var(--green);font-family:var(--font);font-size:11px;text-decoration:none;}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<div id="start">
+  <div class="s-logo">◈ AR_CARD.EXE</div>
+  <div class="s-name">JRENOTH MISQUITH</div>
+  <div class="s-sub">Point camera anywhere, tap to place card floating in real space. No markers. No flat surface needed.</div>
+  <div class="btn-row">
+    <button class="btn btn-ar" id="ar-btn" onclick="startAR()">◈ Place in AR</button>
+    <button class="btn btn-3d" onclick="start3D()">⬡ 3D Preview</button>
+  </div>
+  <div class="s-note" id="s-note">AR: Android Chrome 81+ · 3D Preview: any browser</div>
+  <a href="index.html" class="back-a">← back to card</a>
+</div>
+
+<div id="hud">
+  <div class="hud-top">
+    <span class="hud-id">AR_CARD.EXE</span>
+    <span class="hud-dot"></span>
+  </div>
+  <div class="hud-bottom">
+    <div class="hint" id="hint">Tap to place · Double-tap to flip</div>
+    <div class="hud-btns">
+      <button class="hud-btn" onclick="resetCards()">⟳ Reset</button>
+      <button class="hud-btn" onclick="flipCard()">↻ Flip</button>
+      <a href="index.html" class="hud-btn">← cd ../</a>
+    </div>
+  </div>
+</div>
+
+<!-- Links panel — shown in 3D preview when card is flipped to back -->
+<div id="links-panel" style="
+  display:none; position:fixed; bottom:100px; left:50%; transform:translateX(-50%);
+  z-index:60; background:rgba(7,17,27,0.92); border:1px solid #1a3d5c;
+  border-radius:8px; padding:14px 20px; backdrop-filter:blur(10px);
+  font-family:'JetBrains Mono',monospace; min-width:220px;
+  pointer-events:all;
+">
+  <div style="font-size:8px;color:#2d5040;letter-spacing:1px;margin-bottom:10px;">// tap to open</div>
+  <a href="https://github.com/lowkeyparanoia" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;padding:7px 0;border-bottom:1px solid #102840;">
+    <span style="font-size:7px;color:#00e5ff;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.2);padding:1px 5px;border-radius:2px;">gh</span>
+    <span style="font-size:11px;color:#b8d4c8;">lowkeyparanoia</span>
+  </a>
+  <a href="https://linkedin.com/in/jrenoth" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;padding:7px 0;border-bottom:1px solid #102840;">
+    <span style="font-size:7px;color:#00e5ff;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.2);padding:1px 5px;border-radius:2px;">li</span>
+    <span style="font-size:11px;color:#b8d4c8;">jrenoth</span>
+  </a>
+  <a href="https://lowkeyparanoia.github.io/portfolio/" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;padding:7px 0;">
+    <span style="font-size:7px;color:#00e5ff;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.2);padding:1px 5px;border-radius:2px;">↗</span>
+    <span style="font-size:11px;color:#00ff41;">portfolio</span>
+  </a>
+</div>
+
+<div id="fallback">
+  <div class="fb-err">WebXR not supported</div>
+  <div class="fb-msg">Open on Android Chrome for AR.<br>Or use 3D Preview — works everywhere.</div>
+  <a href="index.html" class="fb-link">← view digital card</a>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────
+// CARD TEXTURE GENERATOR — draws the card design onto a canvas
+// so it can be used as a Three.js texture (no image files needed)
+// ─────────────────────────────────────────────────────────────────
+
+function drawCardFront(w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#020408';
+  ctx.fillRect(0, 0, w, h);
+
+  // Circuit board traces
+  ctx.strokeStyle = 'rgba(0,255,65,0.3)';
+  ctx.lineWidth = 1;
+  const G = 28;
+  for (let r = 0; r < h / G + 1; r++) {
+    const y = r * G;
+    let x = 0;
+    while (x < w) {
+      if (Math.random() > 0.48) {
+        const len = G * (Math.floor(Math.random() * 4) + 1);
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(Math.min(x + len, w), y); ctx.stroke();
+        x += len + G;
+      } else x += G;
+    }
+  }
+  for (let col = 0; col < w / G + 1; col++) {
+    const x = col * G;
+    let y = 0;
+    while (y < h) {
+      if (Math.random() > 0.55) {
+        const len = G * (Math.floor(Math.random() * 3) + 1);
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, Math.min(y + len, h)); ctx.stroke();
+        y += len + G;
+      } else y += G;
+    }
+  }
+  // Vias
+  ctx.fillStyle = 'rgba(0,255,65,0.45)';
+  for (let r = 0; r < h / G; r++) {
+    for (let col = 0; col < w / G; col++) {
+      if (Math.random() > 0.82) {
+        const x = col * G, y = r * G;
+        ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+
+  // Top accent bar
+  const grad = ctx.createLinearGradient(0, 0, w, 0);
+  grad.addColorStop(0, '#00ff41'); grad.addColorStop(1, '#00e5ff');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, 4);
+
+  // Green glow overlay (inner edges)
+  const glowGrad = ctx.createRadialGradient(w/2, h/2, h*0.3, w/2, h/2, h*0.9);
+  glowGrad.addColorStop(0, 'rgba(0,255,65,0)');
+  glowGrad.addColorStop(1, 'rgba(0,255,65,0.08)');
+  ctx.fillStyle = glowGrad;
+  ctx.fillRect(0, 0, w, h);
+
+  // Hexagon logo (top-left)
+  const hx = 32, hy = 28, hr = 16;
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const angle = (Math.PI / 3) * i - Math.PI / 6;
+    i === 0 ? ctx.moveTo(hx + hr * Math.cos(angle), hy + hr * Math.sin(angle))
+             : ctx.lineTo(hx + hr * Math.cos(angle), hy + hr * Math.sin(angle));
+  }
+  ctx.closePath();
+  const hexGrad = ctx.createLinearGradient(hx - hr, hy - hr, hx + hr, hy + hr);
+  hexGrad.addColorStop(0, '#00ff41'); hexGrad.addColorStop(1, '#00e5ff');
+  ctx.fillStyle = hexGrad;
+  ctx.fill();
+
+  // J·M in hex
+  ctx.font = 'bold 10px "Space Grotesk", sans-serif';
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('J·M', hx, hy);
+
+  // Name
+  ctx.font = 'bold ' + Math.round(h * 0.175) + 'px "Space Grotesk", sans-serif';
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.shadowColor = 'rgba(0,255,65,0.35)';
+  ctx.shadowBlur = 12;
+  ctx.fillText('JRENOTH MISQUITH', 16, h * 0.62);
+  ctx.shadowBlur = 0;
+
+  // Role
+  ctx.font = (Math.round(h * 0.082)) + 'px "JetBrains Mono", monospace';
+  ctx.fillStyle = '#00e5ff';
+  ctx.fillText('Backend · AI/ML · Quant · Visuals', 16, h * 0.62 + h * 0.12);
+
+  // Handle (bottom-left)
+  ctx.font = (Math.round(h * 0.072)) + 'px "JetBrains Mono", monospace';
+  ctx.fillStyle = 'rgba(45,80,64,0.9)';
+  ctx.fillText('lowkeyparanoia', 16, h - 14);
+
+  // Border
+  ctx.strokeStyle = 'rgba(0,255,65,0.4)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(1, 1, w - 2, h - 2);
+
+  return c;
+}
+
+function drawCardBack(w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#07111b';
+  ctx.fillRect(0, 0, w, h);
+
+  // Top accent bar
+  const grad = ctx.createLinearGradient(0, 0, w, 0);
+  grad.addColorStop(0, '#00e5ff'); grad.addColorStop(1, '#9a6cf0');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, 4);
+
+  // Subtle cyan glow top
+  const glow = ctx.createLinearGradient(0, 0, 0, h);
+  glow.addColorStop(0, 'rgba(0,229,255,0.06)');
+  glow.addColorStop(1, 'rgba(0,229,255,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
+
+  // Divider line (vertical, between cols)
+  ctx.strokeStyle = 'rgba(26,61,92,0.8)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(w * 0.55, 12); ctx.lineTo(w * 0.55, h - 12); ctx.stroke();
+
+  // LEFT: name + links
+  const lf = 18, sf = Math.round(h * 0.09);
+  ctx.font = 'bold ' + Math.round(h * 0.105) + 'px "Space Grotesk", sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('JRENOTH', lf, h * 0.27);
+  ctx.fillText('MISQUITH', lf, h * 0.27 + Math.round(h * 0.115));
+
+  ctx.font = sf + 'px "JetBrains Mono", monospace';
+  const links = [
+    ['gh', 'lowkeyparanoia'],
+    ['li', 'jrenoth'],
+    ['↗', 'portfolio'],
+  ];
+  links.forEach(([key, val], i) => {
+    const y = h * 0.58 + i * (sf + 7);
+    // Draw key badge background
+    const keyW = ctx.measureText(key).width + 8;
+    ctx.fillStyle = 'rgba(0,229,255,0.12)';
+    roundRect(ctx, lf, y - sf + 2, keyW, sf + 2, 2);
+    // Key text
+    ctx.fillStyle = '#00e5ff';
+    ctx.fillText(key, lf + 4, y);
+    // Value — offset by measured key width + gap, never overlaps
+    ctx.fillStyle = '#b8d4c8';
+    ctx.fillText(val, lf + keyW + 6, y);
+  });
+
+  ctx.font = (sf - 1) + 'px "JetBrains Mono", monospace';
+  ctx.fillStyle = '#ffd700';
+  ctx.fillText('3 continents · Bloomberg #140', lf, h - 14);
+
+  // RIGHT: skill tags
+  const tags = ['Rust','Python','FastAPI','TouchDesigner','Pine Script','Go','Supabase','Claude API','OSC'];
+  const colors = ['#00ff41','#00e5ff','#00ff41','#9a6cf0','#ffd700','#00e5ff','#00ff41','#9a6cf0','#00e5ff'];
+  const rx = w * 0.58;
+  let tx = rx, ty = 14;
+  const tagFont = Math.round(h * 0.078);
+  ctx.font = tagFont + 'px "JetBrains Mono", monospace';
+  const maxW = w - rx - 12;
+
+  tags.forEach((tag, i) => {
+    const tw = ctx.measureText(tag).width + 10;
+    if (tx + tw > rx + maxW) { tx = rx; ty += tagFont + 7; }
+    const col = colors[i];
+    ctx.strokeStyle = col + '55';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = col + '12';
+    roundRect(ctx, tx, ty, tw, tagFont + 5, 2);
+    ctx.fillStyle = col;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(tag, tx + 5, ty + (tagFont + 5) / 2);
+    tx += tw + 5;
+  });
+
+  // Border
+  ctx.strokeStyle = 'rgba(26,61,92,0.9)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(1, 1, w - 2, h - 2);
+
+  return c;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+}
+
+// ─────────────────────────────────────────────────────────────────
+// THREE.JS SCENE
+// ─────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({
+  canvas, alpha: true, antialias: true,
+  logarithmicDepthBuffer: true   // prevents Z-fighting between front/back planes in AR
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.xr.enabled = true;
+
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+camera.position.set(0, 0.08, 0.55);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+const dl = new THREE.DirectionalLight(0x00ff41, 0.6);
+dl.position.set(0.5, 1, 1); scene.add(dl);
+const dl2 = new THREE.DirectionalLight(0x00e5ff, 0.3);
+dl2.position.set(-1, -0.5, -1); scene.add(dl2);
+
+// Card dimensions in metres (standard credit card 85.6×54mm)
+const CW = 0.342, CH = 0.197;
+
+// Build card textures (high-res: 1024×590)
+const TEX_W = 1024, TEX_H = 590;
+
+// Preload fonts so canvas measureText is accurate before drawing
+const fontMono = new FontFace('JetBrains Mono', 'url(https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjOVmtLDs.woff2)');
+const fontSans = new FontFace('Space Grotesk', 'url(https://fonts.gstatic.com/s/spacegrotesk/v16/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gowFXDkg5E.woff2)');
+
+let frontCanvas, backCanvas, frontTex, backTex;
+
+Promise.all([fontMono.load(), fontSans.load()]).then(fonts => {
+  fonts.forEach(f => document.fonts.add(f));
+  frontCanvas = drawCardFront(TEX_W, TEX_H);
+  backCanvas  = drawCardBack(TEX_W, TEX_H);
+
+  const maxAniso = renderer.capabilities.getMaxAnisotropy();
+  frontTex = new THREE.CanvasTexture(frontCanvas);
+  backTex  = new THREE.CanvasTexture(backCanvas);
+  [frontTex, backTex].forEach(t => {
+    t.anisotropy = maxAniso;
+    t.minFilter  = THREE.LinearFilter;
+    t.magFilter  = THREE.LinearFilter;
+    t.generateMipmaps = false;
+    t.needsUpdate = true;
+  });
+
+  // Signal ready
+  document.getElementById('start').style.pointerEvents = 'all';
+  document.getElementById('start').style.opacity = '1';
+}).catch(() => {
+  // Font load failed — draw with fallback font anyway
+  frontCanvas = drawCardFront(TEX_W, TEX_H);
+  backCanvas  = drawCardBack(TEX_W, TEX_H);
+  frontTex = new THREE.CanvasTexture(frontCanvas);
+  backTex  = new THREE.CanvasTexture(backCanvas);
+});
+
+// Card group: front plane + back plane (back-to-back)
+function makeCard() {
+  const group = new THREE.Group();
+  const geo = new THREE.PlaneGeometry(CW, CH);
+
+  // Front face
+  // Use DoubleSide on a SINGLE mesh — eliminates Z-fighting entirely
+  // Front face on +Z side, back face on -Z side using canvas-level separation
+  const mat = new THREE.MeshBasicMaterial({ map: frontTex, side: THREE.FrontSide });
+  const frontMesh = new THREE.Mesh(geo, mat);
+  frontMesh.position.z = 0.0015;
+  group.add(frontMesh);
+
+  const backMesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: backTex, side: THREE.FrontSide }));
+  backMesh.rotation.y = Math.PI;
+  backMesh.position.z = -0.0015;  // larger separation = no depth fight
+  group.add(backMesh);
+
+  // Card edge (thin box for depth illusion)
+  const edgeGeo = new THREE.BoxGeometry(CW, CH, 0.002);
+  const edgeMat = new THREE.MeshBasicMaterial({ color: 0x1a3d5c });
+  group.add(new THREE.Mesh(edgeGeo, edgeMat));
+
+  // Green glow rim light (point light attached to card)
+  const glowLight = new THREE.PointLight(0x00ff41, 0.5, 0.3);
+  glowLight.position.set(0, 0, 0.05);
+  group.add(glowLight);
+
+  return group;
+}
+
+// No reticle — card places in mid-air, no surface scanning needed
+
+// State
+let placedCards = [];
+let hitTestSource = null;
+let xrMode = false;
+let cardFlipped = false;
+let t = 0;
+
+// Demo card (shown in 3D preview mode)
+let demoCard = null;
+
+function resetCards() {
+  placedCards.forEach(c => scene.remove(c));
+  placedCards = [];
+  document.getElementById('hint').innerHTML = 'Tap any flat surface to place card';
+}
+
+const linksPanel = () => document.getElementById('links-panel');
+
+function flipCard() {
+  cardFlipped = !cardFlipped;
+  const targets = xrMode ? placedCards : (demoCard ? [demoCard] : []);
+  targets.forEach(card => {
+    const targetY = cardFlipped ? Math.PI : 0;
+    const startY = card.rotation.y;
+    const dur = 500, t0 = performance.now();
+    function animate(now) {
+      const p = Math.min(1, (now - t0) / dur);
+      const ease = p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p+2,2)/2;
+      card.rotation.y = startY + (targetY - startY) * ease;
+      if (p < 1) requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+  });
+  // Links panel only in 3D preview — never in AR (dom-overlay interferes)
+  const lp = linksPanel();
+  if (lp) lp.style.display = (!xrMode && cardFlipped) ? 'block' : 'none';
+}
+
+// ── 3D Demo mode ──────────────────────────────────────────────────
+function start3D() {
+  document.getElementById('start').style.display = 'none';
+  document.getElementById('hud').classList.add('on');
+  document.getElementById('hint').innerHTML = 'Tap card to flip · links appear on back';
+
+  demoCard = makeCard();
+  scene.add(demoCard);
+
+  // Single tap on canvas = flip in 3D preview
+  canvas.addEventListener('click', () => { if (!xrMode) flipCard(); }, { passive: true });
+
+  renderer.setAnimationLoop(() => {
+    t += 0.008;
+    if (demoCard) {
+      demoCard.position.y = Math.sin(t) * 0.012;
+      demoCard.rotation.x = Math.sin(t * 0.4) * 0.06;
+      camera.position.x = Math.sin(t * 0.25) * 0.18;
+      camera.position.y = 0.08 + Math.sin(t * 0.3) * 0.03;
+      camera.lookAt(0, 0, 0);
+    }
+    renderer.render(scene, camera);
+  });
+}
+
+// No double-tap needed — tap behaviour controlled inside session select handler
+
+// ── WebXR AR mode — attempt directly, no feature detection ────────
+async function startAR() {
+  try {
+    if (!navigator.xr) throw new Error('no xr');
+    const session = await navigator.xr.requestSession('immersive-ar', {
+      requiredFeatures: ['local'],          // no hit-test = no surface scan lag
+      optionalFeatures: ['dom-overlay', 'local-floor'],
+      domOverlay: { root: document.getElementById('hud') }
+    });
+
+    renderer.xr.setSession(session);
+    xrMode = true;
+
+    document.getElementById('start').style.display = 'none';
+    document.getElementById('hud').classList.add('on');
+    document.getElementById('hint').innerHTML = 'Tap anywhere to place card in front of you';
+
+    session.addEventListener('end', () => { xrMode = false; });
+
+    // TAP LOGIC:
+    // — No card placed yet → place card 0.7m in front of camera
+    // — Card already placed → flip it (tap = flip, no more spawning)
+    session.addEventListener('select', () => {
+      if (placedCards.length > 0) {
+        // Already have a card — tap flips it
+        flipCard();
+        document.getElementById('hint').innerHTML =
+          cardFlipped ? 'Tap to flip back · ↻ Flip' : 'Tap to flip · ↻ Flip';
+        return;
+      }
+
+      // First tap — place the card
+      const refSpace = renderer.xr.getReferenceSpace();
+      if (!refSpace) return;
+
+      const xrCamera = renderer.xr.getCamera(camera);
+      const pos = new THREE.Vector3();
+      const quat = new THREE.Quaternion();
+      const scale = new THREE.Vector3();
+      xrCamera.matrixWorld.decompose(pos, quat, scale);
+
+      const forward = new THREE.Vector3(0, 0, -0.7).applyQuaternion(quat);
+      const card = makeCard();
+      card.position.copy(pos).add(forward);
+      card.userData.baseY = card.position.y;
+      card.quaternion.copy(quat);
+      card.rotateX(0.15);
+
+      scene.add(card);
+      placedCards.push(card);
+      document.getElementById('hint').innerHTML = '✓ Card placed · <b>Tap to flip</b>';
+    });
+
+    renderer.setAnimationLoop((time, frame) => {
+      t += 0.006;
+      // Absolute float — no drift accumulation
+      placedCards.forEach((card, i) => {
+        card.position.y = card.userData.baseY + Math.sin(t * 0.8 + i) * 0.006;
+      });
+      renderer.render(scene, camera);
+    });
+
+  } catch(e) {
+    console.error('XR error:', e);
+    showFallback();
+  }
+}
+
+function showFallback() {
+  document.getElementById('start').style.display = 'none';
+  document.getElementById('fallback').style.display = 'flex';
+}
+
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

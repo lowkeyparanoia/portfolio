@@ -2,7 +2,6 @@
   const items = [
     { sym: 'PF',     val: '2.5×',    chg: '+150%',      up: true  },
     { sym: 'FIB',    val: '~70%',    chg: 'hit rate',   up: true  },
-    { sym: 'RET',    val: '10×',     chg: '+900%',      up: true  },
     { sym: 'CRYPTO', val: '+13%',    chg: '1mo',        up: true  },
     { sym: 'RANK',   val: '#140',    chg: 'Bloomberg',  up: true  },
     { sym: 'RISK',   val: '3%',      chg: 'max/trade',  up: false },
