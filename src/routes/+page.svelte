@@ -13,7 +13,6 @@
   import CandlestickChart    from '$lib/components/CandlestickChart.svelte';
   import WaveformCanvas      from '$lib/components/WaveformCanvas.svelte';
   import SpectroCanvas       from '$lib/components/SpectroCanvas.svelte';
-  import CircuitBoard        from '$lib/components/CircuitBoard.svelte';
   import EcgLine             from '$lib/components/EcgLine.svelte';
 
   // ── Boot ─────────────────────────────────────────────────────
@@ -200,22 +199,6 @@
       stack: ['TradingView','Pine Script','Discord Bot','Google Trends','Python'],
       metrics: [{ t: 'Semi-automated', c: 'm-gold' },{ t: 'Retail sentiment', c: 'm-gold' },{ t: 'Multi-source signals', c: 'm-gold' }],
     },
-    {
-      file: 'tv-suite.pine', wide: false, category: 'Quant',
-      type: '// Quant · Pine Script · Backtesting', color: 'green',
-      title: 'TradingView Strategy Suite',
-      desc: 'Custom Pine Script indicators — EMA34/SMA21 cloud with Ichimoku confluence scoring (−5 to +5 regime), Fibonacci rotation entries (0.214–0.25 zone → 0.75–0.786 target, ~70% hit rate w/ candle close + relative strength confirmation). Walk-forward backtested.',
-      stack: ['Pine Script','Ichimoku','Fibonacci','EMA/SMA Cloud','Backtesting'],
-      metrics: [{ t: '2.5× profit factor', c: 'm-green' },{ t: '~70% Fib hit rate', c: 'm-green' },{ t: 'Walk-forward validated', c: 'm-green' }],
-    },
-    {
-      file: 'ai-tutor.py', wide: false, category: 'AI',
-      type: '// EdTech · LLM · Adaptive', color: 'cyan',
-      title: 'AI DSA & SQL Tutor',
-      desc: 'Intelligent tutoring for Python DSA and SQL. Adaptive question gen, step-by-step explanations, personalised difficulty scaling.',
-      stack: ['FastAPI','LLM','Adaptive AI'],
-      metrics: [{ t: 'Adaptive difficulty', c: 'm-cyan' },{ t: 'SQL mastery', c: 'm-cyan' }],
-    },
   ];
 
   const filteredProjects = $derived(
@@ -241,14 +224,6 @@
     { idx: '07', text: 'IELTS Score 8.5 — English Proficiency',                     sub: 'Languages: English · Kannada · Konkani · Hindi',            col: 'gold'  },
   ];
 
-  const skills = [
-    { file: 'backend/',       cat: 'backend',          items: ['Python','FastAPI','Java','Spring','Node.js','REST','WebSockets']                   },
-    { file: 'ai_ml/',         cat: 'AI / ML',          items: ['PyTorch','Transformers','LLM Fine-tuning','Pydantic AI','Claude API','Magenta']    },
-    { file: 'databases/',     cat: 'databases',        items: ['PostgreSQL','MongoDB','Redis','TimescaleDB','Qdrant','MySQL']                      },
-    { file: 'cloud_ops/',     cat: 'cloud / ops',      items: ['Azure','Docker','Kafka','Celery','GitHub Actions','Git']                           },
-    { file: 'audio_systems/', cat: 'audio / music tech',items: ['Rust','Tauri','WASM','TidalCycles','SuperCollider','OSC','TouchDesigner']          },
-    { file: 'finance/',       cat: 'quant / finance',  items: ['Bloomberg Terminal','Pine Script','Ichimoku','Fibonacci','Options GEX','Backtesting']},
-  ];
 </script>
 
 <!-- ══════════════════════════════════════════════════════════ -->
@@ -307,7 +282,7 @@
 <!-- FEATURED WORK (visual hook — above the text)                -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="featured" class="section">
-  <SynthwaveGrid intensity={0.5} />
+  <SynthwaveGrid intensity={0.72} />
   <div class="container">
     <p class="sec-label">featured_work</p>
     <h2 class="sec-title">Selected <span>builds</span> — explore the architecture</h2>
@@ -364,7 +339,7 @@
 <!-- OPEN SOURCE                                                 -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="opensource" class="section">
-  <SynthwaveGrid intensity={0.42} />
+  <SynthwaveGrid intensity={0.72} />
   <div class="container">
     <p class="sec-label">open_source</p>
     <h2 class="sec-title">Open Source <span>Contributions</span></h2>
@@ -437,7 +412,7 @@
 <!-- TRADING                                                     -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="trading" class="section">
-  <SynthwaveGrid intensity={0.4} />
+  <SynthwaveGrid intensity={0.72} />
   <div class="container">
     <p class="sec-label">trading_and_finance</p>
     <h2 class="sec-title">Quantitative <span>Edge</span></h2>
@@ -528,7 +503,7 @@
 <!-- MUSIC                                                       -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="music" class="section">
-  <SynthwaveGrid intensity={0.4} />
+  <SynthwaveGrid intensity={0.72} />
   <div class="container">
     <p class="sec-label">music_tech</p>
     <h2 class="sec-title">Music <span>Technology</span></h2>
@@ -661,7 +636,7 @@
 <!-- ACHIEVEMENTS                                               -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="about" class="section">
-  <SynthwaveGrid intensity={0.42} />
+  <SynthwaveGrid intensity={0.72} />
   <div class="container">
     <p class="sec-label">achievements</p>
     <h2 class="sec-title">Track <span>Record</span></h2>
@@ -684,30 +659,6 @@
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- SKILLS                                                     -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<section id="skills" class="section skills-section">
-  <CircuitBoard opacity={0.22} />
-  <div class="container" style="position:relative;z-index:1">
-    <p class="sec-label">tech_stack</p>
-    <h2 class="sec-title">ls -la <span>skills/</span></h2>
-    <div class="skills-grid">
-      {#each skills as s}
-        <div class="term reveal">
-          <div class="term-bar">
-            <span class="term-btn r"></span><span class="term-btn y"></span><span class="term-btn g"></span>
-            <span class="term-title">{s.file}</span>
-          </div>
-          <div class="term-body">
-            <div class="sk-cat">{s.cat}</div>
-            <div class="sk-items">
-              {#each s.items as item}<span class="sk-item">{item}</span>{/each}
-            </div>
-          </div>
-        </div>
-      {/each}
-    </div>
-  </div>
-</section>
-
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- DIGITAL / AR CARD                                          -->
 <!-- ══════════════════════════════════════════════════════════ -->
@@ -727,7 +678,7 @@
 <!-- CONTACT                                                    -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <section id="contact" class="section alt">
-  <SynthwaveGrid intensity={0.5} />
+  <SynthwaveGrid intensity={0.72} />
   <div class="container">
     <div class="contact-grid reveal">
       <div class="term contact-term">
@@ -750,7 +701,7 @@
             <a href="https://rigorcloud.com" target="_blank" rel="noopener" class="contact-link"><span class="cl-icon">⌬</span> rigorcloud.com</a>
           </div>
           <p class="prompt" style="margin-top:16px;margin-bottom:4px">echo $LOCATION</p>
-          <p class="contact-line">Bengaluru, India · +91 9148703028</p>
+          <p class="contact-line">Bengaluru, India</p>
         </div>
       </div>
       <div class="term profile-card">
@@ -984,9 +935,7 @@
 .ach-main  { display: block; font-size: 0.88rem; color: var(--text); font-weight: 500; }
 .ach-sub   { display: block; font-size: 0.75rem; color: var(--text-mute); margin-top: 2px; }
 
-/* ── SKILLS ────────────────────────────────────────────────── */
-.skills-section { position: relative; overflow: hidden; }
-.skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+/* ── SKILL TAGS (used in the AV section) ───────────────────── */
 .sk-cat   { font-size: 0.7rem; color: var(--text-mute); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
 .sk-items { display: flex; flex-wrap: wrap; gap: 6px; }
 .sk-item  {

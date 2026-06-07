@@ -16,7 +16,7 @@
       arch: ['champiq', 'champsim'],
     },
     {
-      key: 'fieldstone', visual: 'img', img: '/projects/fieldstone-viz.png',
+      key: 'fieldstone', visual: 'img', img: '/projects/fieldstone/01-dashboard.png',
       badge: { t: 'In-house · Open source', c: 'gold' },
       title: 'Fieldstone', tagline: 'in-house PocketBase alternative',
       hook: 'A single Go binary: REST + GraphQL + gRPC over Postgres with real RLS, WASM plugins, a realtime hub.',
